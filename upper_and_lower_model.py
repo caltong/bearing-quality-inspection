@@ -2,6 +2,8 @@ import torch
 from data import UpperAndLowerFacesData, Rescale, ToTensor
 import torchvision
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 upper_and_lower_dataset = UpperAndLowerFacesData(torchvision.transforms.Compose([Rescale(224), ToTensor()]))
 upper_and_lower_data_loader = torch.utils.data.DataLoader(upper_and_lower_dataset, batch_size=32, shuffle=True)
 
@@ -10,32 +12,34 @@ upper_and_lower_data_loader = torch.utils.data.DataLoader(upper_and_lower_datase
 #           sample_batched['label'].size())
 
 model = torchvision.models.vgg16_bn(pretrained=False)
-print(model.features.children())
+model.features[0] = torch.nn.Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+model.classifier[6] = torch.nn.Linear(in_features=4096, out_features=2, bias=True)
+# print(model.features.children())
 # print(model)
+model.to(device)
+criterion = torch.nn.MSELoss()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
-# criterion = torch.nn.MSELoss()
-# optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+for epoch in range(2):  # loop over the dataset multiple times
 
-# for epoch in range(2):  # loop over the dataset multiple times
-#
-#     running_loss = 0.0
-#     for i, data in enumerate(upper_and_lower_data_loader, 0):
-#         # get the inputs; data is a list of [inputs, labels]
-#         inputs, labels = data['image'], data['label']
-#
-#         # zero the parameter gradients
-#         optimizer.zero_grad()
-#
-#         # forward + backward + optimize
-#         outputs = model(inputs)
-#         loss = criterion(outputs, labels)
-#         loss.backward()
-#         optimizer.step()
-#
-#         # print statistics
-#         running_loss += loss.item()
-#         print('[%d, %5d] loss: %.3f' %
-#               (epoch + 1, i + 1, running_loss / 2000))
-#         running_loss = 0.0
-#
-# print('Finished Training')
+    running_loss = 0.0
+    for i, data in enumerate(upper_and_lower_data_loader, 0):
+        # get the inputs; data is a list of [inputs, labels]
+        inputs, labels = data['image'].to(device), data['label'].to(device)
+
+        # zero the parameter gradients
+        optimizer.zero_grad()
+
+        # forward + backward + optimize
+        outputs = model(inputs)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+
+        # print statistics
+        running_loss += loss.item()
+        print('[%d, %5d] loss: %.3f' %
+              (epoch + 1, i + 1, running_loss / 2000))
+        running_loss = 0.0
+
+print('Finished Training')

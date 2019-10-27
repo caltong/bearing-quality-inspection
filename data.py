@@ -56,10 +56,10 @@ class Rescale(object):
 class ToTensor(object):
     def __call__(self, sample):
         image, label = sample['image'], sample['label']
-        image = torch.tensor(image)
+        image = torch.tensor(image, dtype=torch.float)
+        image = image.unsqueeze(0)  # 添加1channel (batch_size,1,224,224)
         label = torch.tensor(label)
         return {'image': image, 'label': label}
-
 
 # test sample
 
