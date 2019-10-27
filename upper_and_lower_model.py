@@ -13,16 +13,16 @@ upper_and_lower_data_loader = torch.utils.data.DataLoader(upper_and_lower_datase
 
 model = torchvision.models.vgg16_bn(pretrained=False)
 model.features[0] = torch.nn.Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-model.classifier[6] = torch.nn.Linear(in_features=4096, out_features=2, bias=True)
+model.classifier[6] = torch.nn.Linear(in_features=4096, out_features=1, bias=True)
+model = torch.nn.Sequential(model, torch.nn.Sigmoid())
 # print(model.features.children())
 # print(model)
 model.to(device)
 criterion = torch.nn.MSELoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.05, momentum=0.9)
 
-for epoch in range(2):  # loop over the dataset multiple times
-
-    running_loss = 0.0
+for epoch in range(256):  # loop over the dataset multiple times
+    correct = 0
     for i, data in enumerate(upper_and_lower_data_loader, 0):
         # get the inputs; data is a list of [inputs, labels]
         inputs, labels = data['image'].to(device), data['label'].to(device)
@@ -37,9 +37,6 @@ for epoch in range(2):  # loop over the dataset multiple times
         optimizer.step()
 
         # print statistics
-        running_loss += loss.item()
-        print('[%d, %5d] loss: %.3f' %
-              (epoch + 1, i + 1, running_loss / 2000))
-        running_loss = 0.0
+        print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, loss.item()))
 
 print('Finished Training')

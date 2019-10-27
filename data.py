@@ -58,7 +58,7 @@ class ToTensor(object):
         image, label = sample['image'], sample['label']
         image = torch.tensor(image, dtype=torch.float)
         image = image.unsqueeze(0)  # 添加1channel (batch_size,1,224,224)
-        label = torch.tensor(label)
+        label = torch.tensor(label, dtype=torch.float)
         return {'image': image, 'label': label}
 
 # test sample
