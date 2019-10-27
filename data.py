@@ -3,6 +3,7 @@ from torch.utils.data import Dataset
 import os
 from skimage import io
 import skimage
+import numpy as np
 import torchvision
 
 
@@ -48,7 +49,31 @@ class Rescale(object):
         image, label = sample['image'], sample['label']
         w, h = 1920, 1200
         image = image[0:h, int(w / 2 - h / 2):int(w / 2 + h / 2)]
-        image = skimage.transform.resize(image, (224, 224))
+        image = skimage.transform.resize(image, (self.output_size, self.output_size))
+
+        return {'image': image, 'label': label}
+
+
+class RandomCrop(object):
+
+    def __init__(self, output_size):
+        assert isinstance(output_size, (int, tuple))
+        if isinstance(output_size, int):
+            self.output_size = (output_size, output_size)
+        else:
+            assert len(output_size) == 2
+            self.output_size = output_size
+
+    def __call__(self, sample):
+        image, label = sample['image'], sample['label']
+
+        h, w = image.shape[:2]
+        new_h, new_w = self.output_size
+
+        top = np.random.randint(0, h - new_h)
+        left = np.random.randint(0, w - new_w)
+
+        image = image[top: top + new_h, left: left + new_w]
 
         return {'image': image, 'label': label}
 
@@ -61,16 +86,18 @@ class ToTensor(object):
         label = torch.tensor(label, dtype=torch.float)
         return {'image': image, 'label': label}
 
+
 # test sample
 
-# upper_dataset = UpperAndLowerFacesData(transform=torchvision.transforms.Compose([Rescale(224),
-#                                                                                  ToTensor()]))
-# data_loader = torch.utils.data.DataLoader(upper_dataset, batch_size=4, shuffle=True)
-#
-# for i in range(5):
-#     sample = upper_dataset[i]
-#     print(i, sample['image'].size(), sample['label'].size())
-#
-# for i_batch, sample_batched in enumerate(data_loader):
-#     print(i_batch, sample_batched['image'].size(),
-#           sample_batched['label'].size())
+upper_dataset = UpperAndLowerFacesData(transform=torchvision.transforms.Compose([Rescale(256),
+                                                                                 RandomCrop(224),
+                                                                                 ToTensor()]))
+data_loader = torch.utils.data.DataLoader(upper_dataset, batch_size=4, shuffle=True)
+
+for i in range(5):
+    sample = upper_dataset[i]
+    print(i, sample['image'].size(), sample['label'].size())
+
+for i_batch, sample_batched in enumerate(data_loader):
+    print(i_batch, sample_batched['image'].size(),
+          sample_batched['label'].size())
