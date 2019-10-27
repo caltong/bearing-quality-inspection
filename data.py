@@ -89,15 +89,15 @@ class ToTensor(object):
 
 # test sample
 
-upper_dataset = UpperAndLowerFacesData(transform=torchvision.transforms.Compose([Rescale(256),
-                                                                                 RandomCrop(224),
-                                                                                 ToTensor()]))
-data_loader = torch.utils.data.DataLoader(upper_dataset, batch_size=4, shuffle=True)
-
-for i in range(5):
-    sample = upper_dataset[i]
-    print(i, sample['image'].size(), sample['label'].size())
-
-for i_batch, sample_batched in enumerate(data_loader):
-    print(i_batch, sample_batched['image'].size(),
-          sample_batched['label'].size())
+# upper_dataset = UpperAndLowerFacesData(transform=torchvision.transforms.Compose([Rescale(256),
+#                                                                                  RandomCrop(224),
+#                                                                                  ToTensor()]))
+# data_loader = torch.utils.data.DataLoader(upper_dataset, batch_size=4, shuffle=True)
+#
+# for i in range(5):
+#     sample = upper_dataset[i]
+#     print(i, sample['image'].size(), sample['label'].size())
+#
+# for i_batch, sample_batched in enumerate(data_loader):
+#     print(i_batch, sample_batched['image'].size(),
+#           sample_batched['label'].size())
