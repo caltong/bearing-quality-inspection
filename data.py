@@ -62,10 +62,11 @@ class ToTensor(object):
 
 
 # test sample
-upper_dataset = UpperAndLowerFacesData(transform=torchvision.transforms.Compose([Rescale(224),
-                                                                                 ToTensor()]))
-data_loader = torch.utils.data.DataLoader(upper_dataset, batch_size=4, shuffle=True)
 
+# upper_dataset = UpperAndLowerFacesData(transform=torchvision.transforms.Compose([Rescale(224),
+#                                                                                  ToTensor()]))
+# data_loader = torch.utils.data.DataLoader(upper_dataset, batch_size=4, shuffle=True)
+#
 # for i in range(5):
 #     sample = upper_dataset[i]
 #     print(i, sample['image'].size(), sample['label'].size())
