@@ -86,7 +86,6 @@ class ToTensor(object):
         label = torch.tensor(label, dtype=torch.float)
         return {'image': image, 'label': label}
 
-
 # test sample
 
 # upper_dataset = UpperAndLowerFacesData(transform=torchvision.transforms.Compose([Rescale(256),
