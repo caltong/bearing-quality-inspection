@@ -1,68 +1,165 @@
-import torch
-from data import UpperAndLowerFacesData, Rescale, RandomCrop, ToTensor
-import torchvision
+import os
 
-epochs = 32
-batch_size = 16
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+import torchvision
+from torchvision import datasets, transforms
+import time
+import copy
+
+from data import Rescale
+
+epochs = 12
+batch_size = 4
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-upper_and_lower_dataset = UpperAndLowerFacesData(torchvision.transforms.Compose([Rescale(256),
-                                                                                 # RandomCrop(224),
-                                                                                 ToTensor()]))
-upper_and_lower_data_loader = torch.utils.data.DataLoader(upper_and_lower_dataset, batch_size=batch_size, shuffle=True)
+data_transforms = {
+    'train': transforms.Compose([
+        transforms.CenterCrop(1200),
+        transforms.Resize(224),
+        transforms.ToTensor(),
+    ]),
+    'val': transforms.Compose([
+        transforms.CenterCrop(1200),
+        transforms.Resize(224),
+        transforms.ToTensor()
+    ]),
+}
 
-# for i_batch, sample_batched in enumerate(upper_and_lower_data_loader):
-#     print(i_batch, sample_batched['image'].size(),
-#           sample_batched['label'].size())
+data_dir = os.path.join('data', '端面')
+image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
+data_loaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size, shuffle=True)
+                for x in ['train', 'val']}
+dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
+class_names = image_datasets['train'].classes
 
-model = torchvision.models.vgg16_bn(pretrained=True)
-model.features[0] = torch.nn.Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
-model.classifier[6] = torch.nn.Linear(in_features=4096, out_features=1, bias=True)
-model = torch.nn.Sequential(model, torch.nn.Sigmoid())
-# print(model.features.children())
-# print(model)
-model.to(device)
-criterion = torch.nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-for epoch in range(epochs):  # loop over the dataset multiple times
-    loss_one_epoch = 0
-    for i, data in enumerate(upper_and_lower_data_loader, 0):
-        # get the inputs; data is a list of [inputs, labels]
-        inputs, labels = data['image'].to(device), data['label'].to(device)
+def imshow(inp, title=None):
+    """Imshow for Tensor."""
+    inp = inp.numpy().transpose((1, 2, 0))
+    mean = np.array([0.485, 0.456, 0.406])
+    std = np.array([0.229, 0.224, 0.225])
+    inp = std * inp + mean
+    inp = np.clip(inp, 0, 1)
+    plt.imshow(inp)
+    if title is not None:
+        plt.title(title)
+    plt.pause(0.001)  # pause a bit so that plots are updated
 
-        # zero the parameter gradients
-        optimizer.zero_grad()
 
-        # forward + backward + optimize
-        outputs = model(inputs)
-        loss = criterion(outputs, labels)
-        loss_one_epoch += (loss.item() * len(labels))
-        loss.backward()
-        optimizer.step()
+def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
+    since = time.time()
 
-        # print statistics
-        print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, loss.item()))
-    # correct = 0
-    # total = 0
-    # with torch.no_grad():
-    #     for data in upper_and_lower_data_loader:
-    #         images, labels = data['image'].to(device), data['label'].to(device)
-    #         outputs = model(images)
-    #         # print(outputs)
-    #         for i in range(outputs.size()[0]):
-    #             if outputs[i] > 0.5 and labels[i] == 1:
-    #                 correct += 1
-    #                 total += 1
-    #             elif outputs[i] <= 0.5 and labels[i] == 0:
-    #                 correct += 1
-    #                 total += 1
-    #             else:
-    #                 total += 1
-    # print('Accuracy of the network on the 132 test images: %d %%' % (
-    #         100 * correct / total))
-    print('Loss of the network on the 132 test images: %f' % (
-            loss_one_epoch / len(upper_and_lower_dataset)))
+    best_model_wts = copy.deepcopy(model.state_dict())
+    best_acc = 0.0
 
-print('Finished Training')
+    for epoch in range(num_epochs):
+        print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+        print('-' * 10)
+
+        # Each epoch has a training and validation phase
+        for phase in ['train', 'val']:
+            if phase == 'train':
+                model.train()  # Set model to training mode
+            else:
+                model.eval()  # Set model to evaluate mode
+
+            running_loss = 0.0
+            running_corrects = 0
+
+            # Iterate over data.
+            for inputs, labels in data_loaders[phase]:
+                inputs = inputs.to(device)
+                labels = labels.to(device)
+
+                # zero the parameter gradients
+                optimizer.zero_grad()
+
+                # forward
+                # track history if only in train
+                with torch.set_grad_enabled(phase == 'train'):
+                    outputs = model(inputs)
+                    _, preds = torch.max(outputs, 1)
+                    loss = criterion(outputs, labels)
+
+                    # backward + optimize only if in training phase
+                    if phase == 'train':
+                        loss.backward()
+                        optimizer.step()
+
+                # statistics
+                running_loss += loss.item() * inputs.size(0)
+                running_corrects += torch.sum(preds == labels.data)
+            if phase == 'train':
+                scheduler.step()
+
+            epoch_loss = running_loss / dataset_sizes[phase]
+            epoch_acc = running_corrects.double() / dataset_sizes[phase]
+
+            print('{} Loss: {:.4f} Acc: {:.4f}'.format(
+                phase, epoch_loss, epoch_acc))
+
+            # deep copy the model
+            if phase == 'val' and epoch_acc > best_acc:
+                best_acc = epoch_acc
+                best_model_wts = copy.deepcopy(model.state_dict())
+
+        print()
+
+    time_elapsed = time.time() - since
+    print('Training complete in {:.0f}m {:.0f}s'.format(
+        time_elapsed // 60, time_elapsed % 60))
+    print('Best val Acc: {:4f}'.format(best_acc))
+
+    # load best model weights
+    model.load_state_dict(best_model_wts)
+    return model
+
+
+def visualize_model(model, num_images=6):
+    was_training = model.training
+    model.eval()
+    images_so_far = 0
+    fig = plt.figure()
+
+    with torch.no_grad():
+        for i, (inputs, labels) in enumerate(data_loaders['val']):
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
+            outputs = model(inputs)
+            _, preds = torch.max(outputs, 1)
+
+            for j in range(inputs.size()[0]):
+                images_so_far += 1
+                ax = plt.subplot(num_images // 2, 2, images_so_far)
+                ax.axis('off')
+                ax.set_title('predicted: {}'.format(class_names[preds[j]]))
+                imshow(inputs.cpu().data[j])
+
+                if images_so_far == num_images:
+                    model.train(mode=was_training)
+                    return
+        model.train(mode=was_training)
+
+
+model_ft = torchvision.models.resnet50(pretrained=True)
+num_ftrs = model_ft.fc.in_features
+# Here the size of each output sample is set to 2.
+# Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
+model_ft.fc = torch.nn.Linear(num_ftrs, 2)
+
+model_ft = model_ft.to(device)
+
+criterion = torch.nn.CrossEntropyLoss()
+
+# Observe that all parameters are being optimized
+optimizer_ft = torch.optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
+
+# Decay LR by a factor of 0.1 every 7 epochs
+exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
+
+model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
+                       num_epochs=epochs)
