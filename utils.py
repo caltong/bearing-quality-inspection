@@ -9,7 +9,7 @@ import numbers
 import torchvision
 
 
-class ObjectCenterCrop(object):
+class UpperAndLowerCenterCrop(object):
     def __call__(self, img):
         cv_img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
@@ -22,6 +22,25 @@ class ObjectCenterCrop(object):
         center_x = circle[0]
         center_y = circle[1]
         center_r = circle[2]
+        half_width = center_r * 1.05  # height = width
+        img = img.crop((int(center_x - half_width), int(center_y - half_width),
+                        int(center_x + half_width), int(center_y + half_width)))
+        return img
+
+
+class SideCenterCrop(object):
+    def __call__(self, img):
+        cv_img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+        gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
+        canny = cv2.Canny(gray, 30, 100)
+        circles = cv2.HoughCircles(canny, cv2.HOUGH_GRADIENT, 1, 200, param1=100, param2=33, minRadius=420,
+                                   maxRadius=470)
+        if circles is None:
+            raise AssertionError('OpenCV find no circle.')
+        circle = circles[0][0]
+        center_x = circle[0]
+        center_y = circle[1]
+        center_r = 455
         half_width = center_r * 1.05  # height = width
         img = img.crop((int(center_x - half_width), int(center_y - half_width),
                         int(center_x + half_width), int(center_y + half_width)))
