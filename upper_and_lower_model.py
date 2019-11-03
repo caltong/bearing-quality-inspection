@@ -8,7 +8,7 @@ from torchvision import datasets, transforms
 import time
 import copy
 
-from data import Rescale
+from utils import ObjectCenterCrop
 
 epochs = 12
 batch_size = 32
@@ -18,11 +18,13 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 data_transforms = {
     'train': transforms.Compose([
         transforms.CenterCrop(1200),
+        ObjectCenterCrop(),
         transforms.Resize(224),
         transforms.ToTensor(),
     ]),
     'val': transforms.Compose([
         transforms.CenterCrop(1200),
+        ObjectCenterCrop(),
         transforms.Resize(224),
         transforms.ToTensor()
     ]),
@@ -163,3 +165,5 @@ exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=7, ga
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
                        num_epochs=epochs)
+
+torch.save(model_ft.state_dict(), 'model_use_restnet50_crop_and_crop.pth')
