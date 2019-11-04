@@ -7,6 +7,7 @@ import numpy as np
 import cv2
 import numbers
 import torchvision
+from PIL import Image, ImageDraw, ImageOps
 
 
 class UpperAndLowerCenterCrop(object):
@@ -21,10 +22,19 @@ class UpperAndLowerCenterCrop(object):
         circle = circles[0][0]
         center_x = circle[0]
         center_y = circle[1]
-        center_r = circle[2]
+        center_r = 455
         half_width = center_r * 1.05  # height = width
         img = img.crop((int(center_x - half_width), int(center_y - half_width),
                         int(center_x + half_width), int(center_y + half_width)))
+        # size = img.size
+        # mask = Image.new('L', size, 0)
+        # draw = ImageDraw.Draw(mask)
+        # draw.ellipse((0, 0) + size, fill=255)
+        # output = ImageOps.fit(img, mask.size, centering=(0.5, 0.5))
+        # output.putalpha(mask)
+        # back = Image.new('L', size, 0)
+        # back.paste(output, (0, 0), output)
+
         return img
 
 
@@ -46,6 +56,31 @@ class SideCenterCrop(object):
                         int(center_x + half_width), int(center_y + half_width)))
         return img
 
+
+class ChamferCenterCrop(object):
+    def __call__(self, img):
+        cv_img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+        gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
+        canny = cv2.Canny(gray, 30, 100)
+        circles = cv2.HoughCircles(canny, cv2.HOUGH_GRADIENT, 1, 200, param1=100, param2=33, minRadius=420,
+                                   maxRadius=470)
+        if circles is None:
+            raise AssertionError('OpenCV find no circle.')
+        circle = circles[0][0]
+        center_x = circle[0]
+        center_y = circle[1]
+        center_r = 470
+        half_width = center_r * 1.05  # height = width
+        img = img.crop((int(center_x - half_width), int(center_y - half_width),
+                        int(center_x + half_width), int(center_y + half_width)))
+        return img
+
+
+def show_img(img):
+    img = (np.array(img) * 255).astype(np.uint8)
+    img = np.moveaxis(img, 0, -1)
+    img = Image.fromarray(img)
+    return img
 # class UpperAndLowerFacesData(Dataset):
 #     def __init__(self, transform=None):
 #         self.root_dir = os.path.join('data', '端面')
