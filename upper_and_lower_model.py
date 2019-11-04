@@ -7,6 +7,7 @@ import torchvision
 from torchvision import datasets, transforms
 import time
 import copy
+import PIL
 
 from utils import UpperAndLowerCenterCrop
 
@@ -19,12 +20,14 @@ data_transforms = {
     'train': transforms.Compose([
         transforms.CenterCrop(1200),
         UpperAndLowerCenterCrop(),
+        transforms.RandomRotation(180),
         transforms.Resize(224),
         transforms.ToTensor(),
     ]),
     'val': transforms.Compose([
         transforms.CenterCrop(1200),
         UpperAndLowerCenterCrop(),
+        # transforms.RandomRotation(180),
         transforms.Resize(224),
         transforms.ToTensor()
     ]),

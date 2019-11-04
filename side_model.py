@@ -19,6 +19,7 @@ data_transforms = {
     'train': transforms.Compose([
         transforms.CenterCrop(1200),
         SideCenterCrop(),
+        transforms.RandomRotation(180),
         transforms.Resize(224),
         transforms.ToTensor(),
     ]),
