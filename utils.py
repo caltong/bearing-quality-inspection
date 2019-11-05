@@ -26,14 +26,13 @@ class UpperAndLowerCenterCrop(object):
         half_width = center_r * 1.05  # height = width
         img = img.crop((int(center_x - half_width), int(center_y - half_width),
                         int(center_x + half_width), int(center_y + half_width)))
-        # size = img.size
-        # mask = Image.new('L', size, 0)
-        # draw = ImageDraw.Draw(mask)
-        # draw.ellipse((0, 0) + size, fill=255)
-        # output = ImageOps.fit(img, mask.size, centering=(0.5, 0.5))
-        # output.putalpha(mask)
-        # back = Image.new('L', size, 0)
-        # back.paste(output, (0, 0), output)
+        size = img.size
+        circle = np.zeros(size, dtype='uint8')  # 黑色背景
+        cv2.circle(circle, (size[0] // 2, size[1] // 2), size[0] // 2, 1, -1)  # 中心圆内不改变
+        circle = np.stack((circle,) * 3, -1)  # 扩展维度 gray to rgb
+        img_np = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+        img_np = img_np * circle
+        img = Image.fromarray(np.array(cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB)))
 
         return img
 
