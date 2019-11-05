@@ -38,6 +38,7 @@ data_loaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=bat
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 class_names = image_datasets['train'].classes
 
+
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     since = time.time()
 
@@ -105,6 +106,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     # load best model weights
     model.load_state_dict(best_model_wts)
     return model
+
 
 model_ft = torchvision.models.resnet50(pretrained=True)
 num_ftrs = model_ft.fc.in_features
