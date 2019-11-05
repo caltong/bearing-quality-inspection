@@ -10,7 +10,7 @@ import copy
 
 from utils import SideCenterCrop
 
-epochs = 12
+epochs = 32
 batch_size = 32
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -40,6 +40,7 @@ class_names = image_datasets['train'].classes
 
 
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
+    print('side model')
     since = time.time()
 
     best_model_wts = copy.deepcopy(model.state_dict())
