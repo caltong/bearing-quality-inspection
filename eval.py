@@ -11,10 +11,12 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('data_path', type=str, help='data path')
 parser.add_argument('model_path', type=str, help='model_path')
+parser.add_argument('mode', type=str, help='bad or good')
 args = parser.parse_args()
 
 data_path = args.data_path
 model_path = args.model_path
+mode = args.mode
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # model = torchvision.models.resnet50()
@@ -84,9 +86,12 @@ def eval_in_dir(path):
         _, pred = torch.max(output, 1)
         if pred == 0:
             zero += 1
-            print(image)
+            if mode == 'good':
+                print(image)
         else:
             one += 1
+            if mode == 'bad':
+                print(image)
         # print(pred)
         # print(time1 - time0, time2 - time1, time3 - time2)
     return zero, one, total
