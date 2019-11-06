@@ -11,7 +11,7 @@ import PIL
 
 from utils import UpperAndLowerCenterCrop
 
-epochs = 32
+epochs = 16
 batch_size = 32
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -170,4 +170,5 @@ exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=7, ga
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
                        num_epochs=epochs)
 
-torch.save(model_ft.state_dict(), 'upper_and_lower_model_use_restnet50_crop_and_crop.pth')
+# torch.save(model_ft.state_dict(), 'upper_and_lower_model_use_restnet50_crop_and_crop.pth')
+torch.save(model_ft, 'upper_and_power_model_use_resnet50_and_crop.pth')
