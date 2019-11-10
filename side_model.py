@@ -10,7 +10,7 @@ import copy
 
 from utils import SideCenterCrop
 
-epochs = 16
+epochs = 12
 batch_size = 32
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
