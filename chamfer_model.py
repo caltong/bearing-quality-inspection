@@ -31,7 +31,7 @@ data_transforms = {
     ]),
 }
 
-data_dir = os.path.join('data', '倒角')
+data_dir = os.path.join('data', 'chamfer')
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
 data_loaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size, shuffle=True, num_workers=4)
                 for x in ['train', 'val']}
