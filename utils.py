@@ -22,7 +22,7 @@ class UpperAndLowerCenterCrop(object):
         circle = circles[0][0]
         center_x = circle[0]
         center_y = circle[1]
-        center_r = 455
+        center_r = 470
         half_width = center_r * 1.05  # height = width
         img = img.crop((int(center_x - half_width), int(center_y - half_width),
                         int(center_x + half_width), int(center_y + half_width)))
@@ -50,7 +50,7 @@ class SideCenterCrop(object):
         circle = circles[0][0]
         center_x = circle[0]
         center_y = circle[1]
-        center_r = 455
+        center_r = 470
         half_width = center_r * 1.05  # height = width
         img = img.crop((int(center_x - half_width), int(center_y - half_width),
                         int(center_x + half_width), int(center_y + half_width)))
