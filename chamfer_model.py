@@ -118,7 +118,7 @@ model_ft.fc = torch.nn.Linear(num_ftrs, 2)
 
 model_ft = model_ft.to(device)
 
-criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([0.9, 0.1]).to(device))
+criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([0.8, 0.2]).to(device))
 # Observe that all parameters are being optimized
 optimizer_ft = torch.optim.SGD(model_ft.parameters(), lr=lr, momentum=0.9)
 
