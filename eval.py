@@ -48,7 +48,7 @@ def img2tensor(path):
     img_np = cv2.cvtColor(np.array(img), cv2.COLOR_GRAY2BGR)  # 黑白照片其实不需要RGB2BGR
     img_np = img_np * circle  # 0去除1留存
     img = Image.fromarray(np.array(cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB)))  # 黑白照片其实不需要RGB2BGR
-    img = resize(img, 224)
+    img = resize(img, 448)
     # img_np = np.array(img)
     # img_np = np.moveaxis(img_np, -1, 0)
     # img_np = img_np[np.newaxis, ...]

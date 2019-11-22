@@ -8,25 +8,27 @@ from torchvision import datasets, transforms
 import time
 import copy
 
-from utils import SideCenterCrop
+from utils import SideCenterCrop, TargetCenterCrop
 
 epochs = 12
-batch_size = 32
+batch_size = 16
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 data_transforms = {
     'train': transforms.Compose([
-        transforms.CenterCrop(1200),
-        SideCenterCrop(),
+        # transforms.CenterCrop(1200),
+        TargetCenterCrop(),
         transforms.RandomRotation(180),
-        transforms.Resize(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ColorJitter(0.1, 0.1, 0.1, 0.1),
+        transforms.Resize(448),
         transforms.ToTensor(),
     ]),
     'val': transforms.Compose([
-        transforms.CenterCrop(1200),
-        SideCenterCrop(),
-        transforms.Resize(224),
+        # transforms.CenterCrop(1200),
+        TargetCenterCrop(),
+        transforms.Resize(448),
         transforms.ToTensor()
     ]),
 }
@@ -117,7 +119,7 @@ model_ft.fc = torch.nn.Linear(num_ftrs, 2)
 
 model_ft = model_ft.to(device)
 
-criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([1.0, 1.0]).to(device))
+criterion = torch.nn.CrossEntropyLoss()
 
 # Observe that all parameters are being optimized
 optimizer_ft = torch.optim.SGD(model_ft.parameters(), lr=lr, momentum=0.9)
