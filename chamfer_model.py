@@ -8,7 +8,7 @@ from torchvision import datasets, transforms
 import time
 import copy
 
-from utils import ChamferCenterCrop
+from utils import ChamferCenterCrop, TargetCenterCrop
 from utils import FocalLoss
 
 epochs = 12
@@ -19,14 +19,14 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 data_transforms = {
     'train': transforms.Compose([
         transforms.CenterCrop(1200),
-        ChamferCenterCrop(),
+        TargetCenterCrop(),
         transforms.RandomRotation(180),
         transforms.Resize(224),
         transforms.ToTensor(),
     ]),
     'val': transforms.Compose([
         transforms.CenterCrop(1200),
-        ChamferCenterCrop(),
+        TargetCenterCrop(),
         transforms.Resize(224),
         transforms.ToTensor()
     ]),
