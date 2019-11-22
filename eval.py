@@ -7,6 +7,7 @@ from torchvision.transforms.functional import to_tensor, center_crop, resize
 import os
 import time
 import argparse
+from utils import get_radius_center
 
 parser = argparse.ArgumentParser()
 parser.add_argument('data_path', type=str, help='data path')
@@ -32,19 +33,11 @@ model.eval()
 
 def img2tensor(path):
     img = Image.open(path)
-    img = img.crop((360, 0, 1560, 1200))
-    cv_img = cv2.cvtColor(np.array(img), cv2.COLOR_GRAY2BGR)
-    gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
-    canny = cv2.Canny(gray, 30, 100)
-    circles = cv2.HoughCircles(canny, cv2.HOUGH_GRADIENT, 1, 200, param1=100, param2=33, minRadius=420,
-                               maxRadius=470)
-    if circles is None:
-        raise AssertionError('OpenCV find no circle.')
-    circle = circles[0][0]
-    center_x = circle[0]
-    center_y = circle[1]
-    center_r = 470
-    half_width = center_r * 1.05  # height = width
+    center, radius = get_radius_center(img)
+    center_x = center[0]
+    center_y = center[1]
+    center_r = radius
+    half_width = int(center_r * 1.01)  # height = width
     img = img.crop((int(center_x - half_width), int(center_y - half_width),
                     int(center_x + half_width), int(center_y + half_width)))
     # 生成mask覆盖非检测区域

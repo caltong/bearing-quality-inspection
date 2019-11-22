@@ -77,7 +77,7 @@ class TargetCenterCrop(object):
         center_x = center[0]
         center_y = center[1]
         center_r = radius
-        half_width = center_r * 1.01  # height = width
+        half_width = int(center_r * 1.01)  # height = width
         img = img.crop((int(center_x - half_width), int(center_y - half_width),
                         int(center_x + half_width), int(center_y + half_width)))
         # 生成mask覆盖非检测区域

@@ -18,14 +18,16 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 data_transforms = {
     'train': transforms.Compose([
-        transforms.CenterCrop(1200),
+        # transforms.CenterCrop(1200),
         TargetCenterCrop(),
         transforms.RandomRotation(180),
+        transforms.RandomHorizontalFlip(),
+        transforms.ColorJitter(0.1, 0.1, 0.1, 0.1),
         transforms.Resize(224),
         transforms.ToTensor(),
     ]),
     'val': transforms.Compose([
-        transforms.CenterCrop(1200),
+        # transforms.CenterCrop(1200),
         TargetCenterCrop(),
         transforms.Resize(224),
         transforms.ToTensor()

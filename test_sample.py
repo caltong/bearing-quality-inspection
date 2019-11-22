@@ -65,7 +65,7 @@ def get_radius_center(image):
 # side r = 460
 # upper r =445
 wrong = []
-path = 'data/side/train/good'
+path = 'data/side/train/bad'
 tic = time()
 for i in os.listdir(path):
     center, radius = get_radius_center(Image.open(os.path.join(path, i)))
