@@ -73,4 +73,4 @@ for i in os.listdir(path):
         print(center, radius, i)
         wrong.append(os.path.join(path, i))
 toc = time()
-print('{}s per image'.format((tic - toc) / len(os.listdir(path))))
+print('{}s per image'.format((toc - tic) / len(os.listdir(path))))
