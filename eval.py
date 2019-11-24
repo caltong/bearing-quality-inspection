@@ -79,6 +79,7 @@ def circle2rectangle(path):
     rec = np.array(rec)
     target_rec = cv2.cvtColor(rec, cv2.COLOR_GRAY2RGB)
     target_rec_pillow = Image.fromarray(target_rec)
+    target_rec_pillow = resize(target_rec_pillow, 448)
     # img_np = np.array(img)
     # img_np = np.moveaxis(img_np, -1, 0)
     # img_np = img_np[np.newaxis, ...]
@@ -120,5 +121,8 @@ def eval_in_dir(path):
     return zero, one, total
 
 
+tic = time.time()
 zero, one, total = eval_in_dir(data_path)
+toc = time.time()
 print('Eval on {} images, zero: {}, one: {}.'.format(total, zero, one))
+print('Use {}s per image.'.format((toc - tic) / total))
