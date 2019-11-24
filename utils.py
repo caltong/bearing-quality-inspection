@@ -11,6 +11,8 @@ from PIL import Image, ImageDraw, ImageOps
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
+import math
+import random
 
 
 def get_radius_center(image):
@@ -68,6 +70,28 @@ def get_radius_center(image):
     center = (int(x), int(y))
     radius = int(radius)
     return center, radius
+
+
+class CircleToRectangle(object):
+    def __call__(self, img):
+        center, radius = get_radius_center(img)
+        img_np = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2GRAY)
+        rec = []
+        r1 = 220
+        r2 = radius
+        rotation = random.random() * 2 * math.pi
+        for i in np.linspace(rotation, 2 * math.pi + rotation, 448):
+            col = []
+            for j in np.linspace(r1, r2, 448):
+                x = int(j * math.cos(i) + center[0])
+                y = int(j * math.sin(i) + center[1])
+                col.append(img_np[y][x])
+            rec.append(col)
+        rec = np.array(rec)
+        target_rec = cv2.cvtColor(rec, cv2.COLOR_GRAY2RGB)
+        target_rec_pillow = Image.fromarray(target_rec)
+
+        return target_rec_pillow
 
 
 class TargetCenterCrop(object):
