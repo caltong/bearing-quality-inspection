@@ -8,7 +8,7 @@ from torchvision import datasets, transforms
 import time
 import copy
 
-from utils import SideCenterCrop, TargetCenterCrop
+from utils import SideCenterCrop, TargetCenterCrop, CircleToRectangle
 
 epochs = 12
 batch_size = 16
@@ -18,16 +18,16 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 data_transforms = {
     'train': transforms.Compose([
         # transforms.CenterCrop(1200),
-        TargetCenterCrop(),
-        transforms.RandomRotation(180),
-        transforms.RandomHorizontalFlip(),
+        CircleToRectangle(),
+        # transforms.RandomRotation(180),
+        transforms.RandomVerticalFlip(p=0.5),
         transforms.ColorJitter(0.1, 0.1, 0.1, 0.1),
         transforms.Resize(448),
         transforms.ToTensor(),
     ]),
     'val': transforms.Compose([
         # transforms.CenterCrop(1200),
-        TargetCenterCrop(),
+        CircleToRectangle(),
         transforms.Resize(448),
         transforms.ToTensor()
     ]),
