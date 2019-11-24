@@ -8,6 +8,7 @@ import os
 import time
 import argparse
 from utils import get_radius_center
+import math
 
 parser = argparse.ArgumentParser()
 parser.add_argument('data_path', type=str, help='data path')
@@ -60,6 +61,35 @@ def img2tensor(path):
     return img_tensor, img
 
 
+def circle2rectangle(path):
+    img = Image.open(path)
+    center, radius = get_radius_center(img)
+    img_np = np.array(img)
+    rec = []
+    r1 = 220
+    r2 = radius
+
+    for i in np.linspace(0, 2 * math.pi, 448):
+        col = []
+        for j in np.linspace(r1, r2, 448):
+            x = int(j * math.cos(i) + center[0])
+            y = int(j * math.sin(i) + center[1])
+            col.append(img_np[y][x])
+        rec.append(col)
+    rec = np.array(rec)
+    target_rec = cv2.cvtColor(rec, cv2.COLOR_GRAY2RGB)
+    target_rec_pillow = Image.fromarray(target_rec)
+    # img_np = np.array(img)
+    # img_np = np.moveaxis(img_np, -1, 0)
+    # img_np = img_np[np.newaxis, ...]
+    # img_tensor = torch.tensor(img_np, dtype=torch.float32)
+    img_tensor = to_tensor(target_rec_pillow)
+    img_tensor = img_tensor.numpy()
+    img_tensor = img_tensor[np.newaxis, ...]
+    img_tensor = torch.from_numpy(img_tensor)
+    return img_tensor, target_rec_pillow
+
+
 def eval_in_dir(path):
     images = os.listdir(path)
     zero = 0
@@ -68,7 +98,7 @@ def eval_in_dir(path):
     for image in images:
         dir = os.path.join(path, image)
         time0 = time.time()
-        img_tensor, img = img2tensor(dir)
+        img_tensor, img = circle2rectangle(dir)
         time1 = time.time()
         img_tensor.to(device)
         time2 = time.time()
