@@ -99,7 +99,7 @@ def eval_in_dir(path):
     for image in images:
         dir = os.path.join(path, image)
         time0 = time.time()
-        img_tensor, img = circle2rectangle(dir)
+        img_tensor, img = img2tensor(dir)
         time1 = time.time()
         img_tensor.to(device)
         time2 = time.time()
