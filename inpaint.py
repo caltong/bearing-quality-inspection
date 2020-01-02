@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 import cv2
 import json
 
-img_id = '12060_053'
+img_id = 'inpaint-sample/12060_394'
 img = cv2.imread(img_id + '.bmp')
 with open(img_id + '.json') as f:
     json_labels = json.load(f)
