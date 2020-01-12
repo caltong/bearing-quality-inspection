@@ -10,42 +10,29 @@ def generate_new_data(image_path, labels_path):
     image_cv2 = cv2.imread(image_path)  # cv2 load image
     with open(labels_path) as f:  # json load labels
         json_labels = json.load(f)
-
     # 解析labels
-    labels = []  # 损伤位置组成的list
+    labels = []  # 损伤位置组成的list [np.array,...]
     for i in json_labels['shapes']:
-        labels.append(i['points'])
-
-    # 根据labels创建mask遮罩
-    mask = np.zeros((image_cv2.shape[0], image_cv2.shape[1]), np.uint8)
-    for i in labels:
-        cv2.fillPoly(mask, [np.array(i, np.int32)], (255, 255, 255))
-    # inpaint
-    background = cv2.inpaint(image_cv2, mask, 3, cv2.INPAINT_NS)
+        labels.append(np.array(i['points'], np.int32))
 
     # 获取工件中心坐标和半径
-    center, radius = get_radius_center(Image.fromarray(background))
+    center, radius = get_radius_center(Image.fromarray(image_cv2))
     left_up_corner = np.array(center) - radius
-    # 获取损伤目标小图
-    new_labels = []
-    for i in labels:
-        a_np_label = np.array(i, np.int32)
-        plus_len = a_np_label.shape[0]
-        plus = np.repeat([left_up_corner], plus_len, axis=0)
-        a_np_label = a_np_label - plus
-        new_labels.append(a_np_label)
 
-    # 获取原图裁切目标图 带有损伤信息
+    # 获取原图裁切目标图 带有损伤信息 cv2 crop [y:y+h,x:x+h]
     origin_crop_image = image_cv2[center[1] - radius:center[1] + radius,
                         center[0] - radius:center[0] + radius]
 
+    # 根据labels创建mask遮罩
+    mask = np.zeros((origin_crop_image.shape[0], origin_crop_image.shape[1]), np.uint8)
+    # 根据圆心坐标移动labels坐标 labels [np.array,...]
+    for i in range(len(labels)):
+        labels[i] = labels[i] - np.repeat([left_up_corner], len(labels[i]), axis=0)
+        cv2.fillPoly(mask, [labels[i]], 255)
+    # inpaint
+    background = cv2.inpaint(origin_crop_image, mask, 3, cv2.INPAINT_NS)
 
-
-    # crop (left, top, right, bottom)
-    new_image = Image.fromarray(background).crop((center[0] - radius,
-                                                  center[1] - radius,
-                                                  center[0] + radius,
-                                                  center[1] + radius))
+    new_image = Image.fromarray(background)
     return new_image
 
 
