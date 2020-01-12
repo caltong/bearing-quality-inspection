@@ -4,10 +4,11 @@ import numpy as np
 from PIL import Image
 from utils import get_radius_center
 from time import time
+import copy
 
 
 def generate_new_data(image_path, labels_path):
-    image_cv2 = cv2.imread(image_path)  # cv2 load image
+    image_cv2 = cv2.imread(image_path)  # cv2 load image BGR image has 3 channels
     with open(labels_path) as f:  # json load labels
         json_labels = json.load(f)
     # 解析labels
@@ -32,7 +33,21 @@ def generate_new_data(image_path, labels_path):
     # inpaint
     background = cv2.inpaint(origin_crop_image, mask, 3, cv2.INPAINT_NS)
 
-    new_image = Image.fromarray(background)
+    # 分别调整每个损伤
+    new_image = copy.deepcopy(background)
+    new_image = cv2.cvtColor(new_image, cv2.COLOR_BGR2GRAY)
+    origin_copy = copy.deepcopy(origin_crop_image)
+    origin_copy = cv2.cvtColor(origin_copy, cv2.COLOR_BGR2GRAY)
+    for i in labels:
+        single_mask = np.zeros(new_image.shape, np.uint8)
+        single_mask = cv2.fillPoly(single_mask, [i], 1)
+        single_mask = np.multiply(single_mask, origin_copy)
+        background_mask = np.ones(new_image.shape, np.uint8)
+        background_mask = cv2.fillPoly(background_mask, [i], 0)
+        background_mask = np.multiply(background_mask, new_image)
+        new_image = np.add(single_mask, background_mask)
+
+    new_image = Image.fromarray(new_image)
     return new_image
 
 
