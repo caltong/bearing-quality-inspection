@@ -52,15 +52,16 @@ def generate_new_data(image_path, labels_path):
         y0 = (np.min(i[:, 1]) + np.max(i[:, 1])) / 2
         k = (yc - y0) / (xc - x0)
         b = yc - k * xc
-        delta_x = int((random.random() - 0.5) * 100)
+        delta_x = int((random.random() - 0.5) * 50)
         delta_y = int(k * (x0 + delta_x) + b - y0)
-
-        # 移动损伤位置
-        (mx, my) = np.meshgrid(np.arange(single_mask.shape[1]), np.arange(single_mask.shape[0]))
-        ox = (mx - delta_x).astype(np.float32)
-        oy = (my - delta_y).astype(np.float32)
-        single_mask = cv2.remap(single_mask, ox, oy, cv2.INTER_LINEAR)
-
+        if random.randint(0, 1):
+            # 移动损伤位置
+            (mx, my) = np.meshgrid(np.arange(single_mask.shape[1]), np.arange(single_mask.shape[0]))
+            ox = (mx - delta_x).astype(np.float32)
+            oy = (my - delta_y).astype(np.float32)
+            single_mask = cv2.remap(single_mask, ox, oy, cv2.INTER_LINEAR)
+        else:
+            delta_x, delta_y = 0, 0
         # 对应的改变背景留黑位置
         adjust_i = i + np.array([delta_x, delta_y])
 
@@ -76,7 +77,7 @@ def generate_new_data(image_path, labels_path):
 
 if __name__ == "__main__":
     tic = time()
-    new_image = generate_new_data("inpaint-sample/12060_943.bmp", "inpaint-sample/12060_943.json")
+    new_image = generate_new_data("inpaint-sample/12060_942.bmp", "inpaint-sample/12060_942.json")
     toc = time()
     print(toc - tic)
     new_image.show()
