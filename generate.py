@@ -45,7 +45,7 @@ def generate_new_data(image_path, labels_path):
         single_mask = cv2.fillPoly(single_mask, [i], 1)
         single_mask = np.multiply(single_mask, origin_copy)
 
-        # 移动损伤位置
+        # 获取随机移动值
         xc = radius
         yc = radius
         x0 = (np.min(i[:, 0]) + np.max(i[:, 0])) / 2
@@ -55,10 +55,13 @@ def generate_new_data(image_path, labels_path):
         delta_x = int((random.random() - 0.5) * 100)
         delta_y = int(k * (x0 + delta_x) + b - y0)
 
+        # 移动损伤位置
         (mx, my) = np.meshgrid(np.arange(single_mask.shape[1]), np.arange(single_mask.shape[0]))
         ox = (mx - delta_x).astype(np.float32)
         oy = (my - delta_y).astype(np.float32)
         single_mask = cv2.remap(single_mask, ox, oy, cv2.INTER_LINEAR)
+
+        # 对应的改变背景留黑位置
         adjust_i = i + np.array([delta_x, delta_y])
 
         # 只要其他区域不要损伤区域
@@ -73,7 +76,7 @@ def generate_new_data(image_path, labels_path):
 
 if __name__ == "__main__":
     tic = time()
-    new_image = generate_new_data("inpaint-sample/12060_942.bmp", "inpaint-sample/12060_942.json")
+    new_image = generate_new_data("inpaint-sample/12060_943.bmp", "inpaint-sample/12060_943.json")
     toc = time()
     print(toc - tic)
     new_image.show()
