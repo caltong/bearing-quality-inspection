@@ -54,7 +54,7 @@ def generate_new_data(image_path, labels_path):
         b = yc - k * xc
         delta_x = int((random.random() - 0.5) * 50)
         delta_y = int(k * (x0 + delta_x) + b - y0)
-        if random.randint(0, 1):
+        if 1:
             # 移动损伤位置
             (mx, my) = np.meshgrid(np.arange(single_mask.shape[1]), np.arange(single_mask.shape[0]))
             ox = (mx - delta_x).astype(np.float32)
