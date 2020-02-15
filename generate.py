@@ -46,11 +46,11 @@ def generate_new_data(image_path, labels_path):
         single_mask = np.multiply(single_mask, origin_copy)
 
         # 获取随机移动值
-        xc = radius
-        yc = radius
-        x0 = (np.min(i[:, 0]) + np.max(i[:, 0])) / 2
-        y0 = (np.min(i[:, 1]) + np.max(i[:, 1])) / 2
-        k = (yc - y0) / (xc - x0)
+        xc = radius  # 中心坐标
+        yc = radius  # 中心坐标
+        x0 = (np.min(i[:, 0]) + np.max(i[:, 0])) / 2  # 损伤位置 平均中心坐标
+        y0 = (np.min(i[:, 1]) + np.max(i[:, 1])) / 2  # 损伤位置 平均中心坐标
+        k = (yc - y0) / (xc - x0)  # 移动线路 损伤与工件圆心的连线
         b = yc - k * xc
         delta_x = int((random.random() - 0.5) * 50)
         delta_y = int(k * (x0 + delta_x) + b - y0)
@@ -71,13 +71,17 @@ def generate_new_data(image_path, labels_path):
         background_mask = np.multiply(background_mask, new_image)
         new_image = np.add(single_mask, background_mask)
 
-    new_image = Image.fromarray(new_image)
-    return new_image
+        # 旋转图像
+        new_image = Image.fromarray(new_image)
+        new_image = new_image.rotate(random.random() * 360, resample=Image.BICUBIC)
+        new_image = np.array(new_image)
+
+    return Image.fromarray(new_image)
 
 
 if __name__ == "__main__":
     tic = time()
-    new_image = generate_new_data("inpaint-sample/12060_942.bmp", "inpaint-sample/12060_942.json")
+    new_image = generate_new_data("inpaint-sample/12060_351.bmp", "inpaint-sample/12060_351.json")
     toc = time()
     print(toc - tic)
     new_image.show()
