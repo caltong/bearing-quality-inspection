@@ -5,8 +5,8 @@ import json
 from utils import get_radius_center
 from PIL import Image
 
-img_id = 'inpaint-sample/12060_942'
-img = cv2.imread(img_id + '.bmp')
+img_id = 'test/01130_1'
+img = cv2.imread(img_id + '.jpg')
 with open(img_id + '.json') as f:
     json_labels = json.load(f)
 

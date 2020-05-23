@@ -81,7 +81,7 @@ def generate_new_data(image_path, labels_path):
 
 if __name__ == "__main__":
     tic = time()
-    new_image = generate_new_data("inpaint-sample/12060_351.bmp", "inpaint-sample/12060_351.json")
+    new_image = generate_new_data("test/01130_1.jpg", "test/01130_1.json")
     toc = time()
     print(toc - tic)
     new_image.show()
