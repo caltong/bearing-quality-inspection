@@ -23,4 +23,8 @@ for image in image_list:
     else:
         one_data.append("None")
     data.append(one_data)
+
+data_frame = pd.DataFrame(data)
+data_frame.to_csv("./test/label.csv")
+print(data_frame)
 print(data)
