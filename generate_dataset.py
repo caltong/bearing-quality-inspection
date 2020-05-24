@@ -4,6 +4,7 @@ from skimage import io
 import numpy as np
 import os
 import pandas as pd
+from PIL import Image
 
 
 class GenerateDataset(Dataset):
@@ -29,12 +30,12 @@ class GenerateDataset(Dataset):
             idx = idx.tolist()
 
         img_name = os.path.join(self.root_dir, self.csv_data.iloc[idx, 0])
-        image = io.imread(img_name)
+        image = Image.fromarray(io.imread(img_name))
         label = self.csv_data.iloc[idx, 1]
         label = np.array([label])
         label = label.astype('float')
-        json_path = self.csv_data.iloc[idx, 2]
-        sample = {'image': image, 'label': label, 'json_path': json_path}
+        json_path = os.path.join(self.root_dir, self.csv_data.iloc[idx, 2])
+        sample = {'image': image, 'label': label, 'image_path': img_name, 'json_path': json_path}
 
         if self.transform:
             sample = self.transform(sample)
@@ -48,4 +49,4 @@ if __name__ == "__main__":
     for i in range(len(dataset)):
         sample = dataset[i]
 
-        print(i, sample['image'].shape, sample['label'].shape, sample['json_path'])
+        print(i, sample['image'].size, sample['label'].shape, sample['image_path'], sample['json_path'])

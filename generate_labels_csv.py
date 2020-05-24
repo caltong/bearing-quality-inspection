@@ -9,7 +9,7 @@ image_list = []
 for file in files:
     if file.endswith(".json"):
         json_list.append(file)
-    else:
+    elif not file.endswith(".csv"):
         image_list.append(file)
 
 # 写入csv的数据
@@ -25,6 +25,6 @@ for image in image_list:
     data.append(one_data)
 
 data_frame = pd.DataFrame(data)
-data_frame.to_csv("./test/label.csv")
+data_frame.to_csv("./test/label.csv", header=False, index=False)
 print(data_frame)
 print(data)
