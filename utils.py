@@ -15,6 +15,22 @@ import math
 import random
 
 
+def add_black_background(image):
+    # 添加黑色背景 适配side model
+    size = image.size
+    circle = np.zeros(size, dtype='uint8')
+    cv2.circle(circle, (size[0] // 2, size[1] // 2), int((size[0] // 2) * 0.95), 1, -1)
+    circle = np.stack((circle,) * 3, -1)
+    if len(np.array(image).shape) == 2:
+        img_np = cv2.cvtColor(np.array(image), cv2.COLOR_GRAY2BGR)
+    else:
+        img_np = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)  # 黑白照片其实不需要RGB2BGR
+    img_np = img_np * circle  # 0去除1留存
+    img = Image.fromarray(np.array(cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB)))
+
+    return img
+
+
 def get_radius_center(image):
     # image = Image.open('data/upper/train/bad/06031_233.bmp')
     img = np.array(image)
