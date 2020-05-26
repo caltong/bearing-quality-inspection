@@ -62,8 +62,9 @@ if __name__ == '__main__':
                                          transform=transforms.Compose([Generate(True)]))
     for i in range(len(transforms_dataset)):
         sample = transforms_dataset[i]
-        if i == 10:
-            sample['image'].show()
+        if i == 20:
+            break
+        sample['image'].show()
         print(i, sample['image'], sample['label'])
     # train_data_loader = torch.utils.data.DataLoader(transforms_dataset, batch_size=16, shuffle=True)
     #
