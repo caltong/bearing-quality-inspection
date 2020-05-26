@@ -2,7 +2,7 @@ import cv2
 import json
 import numpy as np
 from PIL import Image
-from utils import get_radius_center
+from utils import get_radius_center, add_black_background
 from time import time
 import copy
 import random
@@ -85,3 +85,4 @@ if __name__ == "__main__":
     toc = time()
     print(toc - tic)
     new_image.show()
+    add_black_background(new_image).show()
