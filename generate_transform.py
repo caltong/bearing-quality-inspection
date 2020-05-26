@@ -5,6 +5,7 @@ import torch
 import numpy as np
 from utils import get_radius_center
 from torchvision.transforms.functional import crop
+from utils import add_black_background
 
 
 class Generate(object):
@@ -34,6 +35,7 @@ class Generate(object):
             left_up_corner = np.array(center) - radius
             image = crop(image, left_up_corner[1], left_up_corner[0], radius * 2, radius * 2)
         image = image.resize((512, 512))
+        image = add_black_background(image)
         return {'image': image, 'label': label}
 
 
