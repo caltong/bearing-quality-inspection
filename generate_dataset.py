@@ -44,7 +44,7 @@ class GenerateDataset(Dataset):
 
 
 if __name__ == "__main__":
-    dataset = GenerateDataset(csv_file='test/label.csv', root_dir='test')
+    dataset = GenerateDataset(csv_file='./train.csv', root_dir='./')
 
     for i in range(len(dataset)):
         sample = dataset[i]

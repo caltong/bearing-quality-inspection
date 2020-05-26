@@ -43,7 +43,7 @@ class ToTensor(object):
 
 
 if __name__ == '__main__':
-    transforms_dataset = GenerateDataset(csv_file='test/label.csv', root_dir='test',
+    transforms_dataset = GenerateDataset(csv_file='./train.csv', root_dir='./',
                                          transform=transforms.Compose([Generate(True),
                                                                        ToTensor()]))
     for i in range(len(transforms_dataset)):
