@@ -1,6 +1,6 @@
 from torchvision import transforms
 from generate_dataset import GenerateDataset
-from generate_transform import Generate, ToTensor
+from generate_transform import Generate, ToTensor, ColorJitter, AddBlackBackground, RandomRotation, Flip, Resize
 import torch
 import time
 import copy
@@ -15,8 +15,17 @@ batch_size = 32
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-train_transform = transforms.Compose([Generate(False), ToTensor()])
-val_transform = transforms.Compose([Generate(False), ToTensor()])
+train_transform = transforms.Compose([Generate(False),
+                                      ColorJitter(0.5, 1.0, 1.0, 1.0, 1.0),
+                                      AddBlackBackground(),
+                                      RandomRotation(180),
+                                      Flip(0.5),
+                                      Resize(512),
+                                      ToTensor()])
+val_transform = transforms.Compose([Generate(False),
+                                    AddBlackBackground(),
+                                    Resize(512),
+                                    ToTensor()])
 
 train_dataset = GenerateDataset(csv_file='./train.csv', root_dir='./', transform=train_transform)
 train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=4, shuffle=True)
