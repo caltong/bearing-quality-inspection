@@ -20,7 +20,7 @@ train_transform = transforms.Compose([Generate(False),
                                       AddBlackBackground(),
                                       RandomRotation(180),
                                       Flip(0.5),
-                                      Resize(512),
+                                      Resize(1024),
                                       ToTensor()])
 val_transform = transforms.Compose([Generate(False),
                                     AddBlackBackground(),
