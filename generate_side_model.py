@@ -11,7 +11,7 @@ train_csv = './train.csv'
 val_csv = './val.csv'
 
 epochs = 12
-batch_size = 16
+batch_size = 32
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -103,7 +103,10 @@ num_ftrs = model_ft.fc.in_features
 # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
 model_ft.fc = torch.nn.Linear(num_ftrs, 2)
 
-model_ft = model_ft.to(device)
+# model_ft = model_ft.to(device)
+# 开启多卡
+model_ft = torch.nn.DataParallel(model_ft)
+model_ft.cuda()
 
 criterion = torch.nn.CrossEntropyLoss()
 
