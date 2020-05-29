@@ -10,8 +10,8 @@ root_dir = './'
 train_csv = './train.csv'
 val_csv = './val.csv'
 
-epochs = 12
-batch_size = 32
+epochs = 24
+batch_size = 8
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -20,7 +20,7 @@ train_transform = transforms.Compose([Generate(False),
                                       AddBlackBackground(),
                                       RandomRotation(180),
                                       Flip(0.5),
-                                      Resize(1024),
+                                      Resize(512),
                                       ToTensor()])
 val_transform = transforms.Compose([Generate(False),
                                     AddBlackBackground(),
@@ -28,10 +28,10 @@ val_transform = transforms.Compose([Generate(False),
                                     ToTensor()])
 
 train_dataset = GenerateDataset(csv_file='./train.csv', root_dir='./', transform=train_transform)
-train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=4, shuffle=True)
+train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
 val_dataset = GenerateDataset(csv_file='./val.csv', root_dir='./', transform=val_transform)
-val_data_loader = torch.utils.data.DataLoader(val_dataset, batch_size=4, shuffle=True)
+val_data_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
 data_loaders = {'train': train_data_loader, 'val': val_data_loader}
 dataset_sizes = {'train': len(train_dataset), 'val': len(val_dataset)}
@@ -106,7 +106,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=12):
     return model
 
 
-model_ft = torchvision.models.resnet50(pretrained=True)
+model_ft = torchvision.models.resnext101_32x8d(pretrained=True)
 num_ftrs = model_ft.fc.in_features
 # Here the size of each output sample is set to 2.
 # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
@@ -123,7 +123,7 @@ criterion = torch.nn.CrossEntropyLoss()
 optimizer_ft = torch.optim.SGD(model_ft.parameters(), lr=lr, momentum=0.9)
 
 # Decay LR by a factor of 0.1 every 7 epochs
-exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
+exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.3)
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
                        num_epochs=epochs)
