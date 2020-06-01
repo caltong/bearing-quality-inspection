@@ -19,13 +19,13 @@ class Generate(object):
             to output_size keeping aspect ratio the same.
     """
 
-    def __init__(self, flag=True):
-        self.flag = flag
+    def __init__(self, p=0):
+        self.p = p
 
     def __call__(self, sample):
         image, label = sample['image'], sample['label']
         # print(sample['json_path'])
-        if self.flag:
+        if random.random() < self.p:
             if sample['json_path'][-4:] != 'None':
                 image = generate_new_data(sample['image_path'], sample['json_path'])
             else:
@@ -130,7 +130,7 @@ class ToTensor(object):
 
 if __name__ == '__main__':
     transforms_dataset = GenerateDataset(csv_file='./train.csv', root_dir='./',
-                                         transform=transforms.Compose([Generate(True),
+                                         transform=transforms.Compose([Generate(1),
                                                                        ColorJitter(0.5, 1.0, 1.0, 1.0, 1.0),
                                                                        AddBlackBackground(),
                                                                        RandomRotation(180),

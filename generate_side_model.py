@@ -10,19 +10,19 @@ root_dir = './'
 train_csv = './train.csv'
 val_csv = './val.csv'
 
-epochs = 24
+epochs = 16
 batch_size = 8
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-train_transform = transforms.Compose([Generate(False),
+train_transform = transforms.Compose([Generate(0.3),
                                       ColorJitter(0.5, 1.0, 1.0, 1.0, 1.0),
                                       AddBlackBackground(),
                                       RandomRotation(180),
                                       Flip(0.5),
                                       Resize(512),
                                       ToTensor()])
-val_transform = transforms.Compose([Generate(False),
+val_transform = transforms.Compose([Generate(0),
                                     AddBlackBackground(),
                                     Resize(512),
                                     ToTensor()])
@@ -106,7 +106,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=12):
     return model
 
 
-model_ft = torchvision.models.resnext101_32x8d(pretrained=True)
+model_ft = torchvision.models.resnet101(pretrained=True)
 num_ftrs = model_ft.fc.in_features
 # Here the size of each output sample is set to 2.
 # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
