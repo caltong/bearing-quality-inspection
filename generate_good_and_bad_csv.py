@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 
-root_dir = os.path.join('data', 'side')
+root_dir = os.path.join('data_half', 'side')
 train_or_val = ['train', 'val']
 good_or_bad = ['good', 'bad']
 # json文件临时位置

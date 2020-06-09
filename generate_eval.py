@@ -35,6 +35,7 @@ def img2tensor(image_path):
     image = image.transpose((2, 0, 1))
     if image.shape[0] == 1:
         image = np.repeat(image, 3, axis=0)
+    image = image[np.newaxis, ...]
     image = torch.from_numpy(image).float()
     return image, image_ori
 
@@ -70,9 +71,9 @@ def eval_in_dir(path):
 
 
 if __name__ == '__main__':
-    mode = 'good'
+    mode = 'bad'
     tic = time.time()
-    zero, one, total = eval_in_dir(os.path.join('data', 'side', 'val', 'good'))
+    zero, one, total = eval_in_dir(os.path.join('data', 'side', 'val', 'bad'))
     toc = time.time()
     print('Eval on {} images, zero: {}, one: {}.'.format(total, zero, one))
     print('Use {}s per image.'.format((toc - tic) / total))
