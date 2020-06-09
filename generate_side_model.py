@@ -10,12 +10,12 @@ root_dir = './'
 train_csv = './train.csv'
 val_csv = './val.csv'
 
-epochs = 32
+epochs = 16
 batch_size = 8
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-train_transform = transforms.Compose([Generate(0.5),
+train_transform = transforms.Compose([Generate(0),
                                       ColorJitter(0.5, 1.0, 1.0, 1.0, 1.0),
                                       AddBlackBackground(),
                                       RandomRotation(180),
@@ -123,7 +123,7 @@ criterion = torch.nn.CrossEntropyLoss()
 optimizer_ft = torch.optim.SGD(model_ft.parameters(), lr=lr, momentum=0.9)
 
 # Decay LR by a factor of 0.1 every 7 epochs
-exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
+exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.3)
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
                        num_epochs=epochs)
