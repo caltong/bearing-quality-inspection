@@ -159,7 +159,8 @@ if __name__ == '__main__':
                                                                        RandomRotation(180),
                                                                        Flip(0.5),
                                                                        Resize(512),
-                                                                       RandomCrop(p=1, scale=300)]))
+                                                                       # RandomCrop(p=1, scale=450)
+                                                                       ]))
     for i in range(len(transforms_dataset)):
         sample = transforms_dataset[i]
         if i == 5:
