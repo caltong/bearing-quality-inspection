@@ -110,6 +110,29 @@ class Flip(object):
         return {'image': image, 'label': label}
 
 
+class RandomCrop(object):
+    def __init__(self, p=0.5, scale=224):
+        self.p = p
+        self.scale = scale
+
+    def __call__(self, sample):
+        image, label = sample['image'], sample['label']
+        if random.random() < self.p:
+            image = np.array(image)
+            origin_width = image.shape[0]
+            if origin_width < self.scale:
+                raise TypeError('scale should be smaller than origin width')
+
+            random_scale = random.randint(self.scale, origin_width)
+            random_start_left = random.randint(0, origin_width - random_scale)
+            random_start_right = random.randint(0, origin_width - random_scale)
+            new_image = image[random_start_left:random_start_left + random_scale,
+                        random_start_right:random_start_right + random_scale,
+                        :]
+            new_image = Image.fromarray(new_image, mode='RGB')
+        return {'image': new_image, 'label': label}
+
+
 class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
 
@@ -135,7 +158,8 @@ if __name__ == '__main__':
                                                                        AddBlackBackground(),
                                                                        RandomRotation(180),
                                                                        Flip(0.5),
-                                                                       Resize(512)]))
+                                                                       Resize(512),
+                                                                       RandomCrop(p=1, scale=300)]))
     for i in range(len(transforms_dataset)):
         sample = transforms_dataset[i]
         if i == 5:
