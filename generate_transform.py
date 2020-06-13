@@ -130,7 +130,8 @@ class RandomCrop(object):
                         random_start_right:random_start_right + random_scale,
                         :]
             new_image = Image.fromarray(new_image, mode='RGB')
-        return {'image': new_image, 'label': label}
+            return {'image': new_image, 'label': label}
+        return {'image': image, 'label': label}
 
 
 class ToTensor(object):

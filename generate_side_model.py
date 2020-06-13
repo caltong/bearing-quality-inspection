@@ -1,6 +1,7 @@
 from torchvision import transforms
 from generate_dataset import GenerateDataset
 from generate_transform import Generate, ToTensor, ColorJitter, AddBlackBackground, RandomRotation, Flip, Resize
+from generate_transform import RandomCrop
 import torch
 import time
 import copy
@@ -16,10 +17,12 @@ lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 train_transform = transforms.Compose([Generate(0),
-                                      ColorJitter(0.5, 1.0, 1.0, 1.0, 1.0),
+                                      ColorJitter(0.1, 0.1, 0.1, 0.1, 0.1),
                                       AddBlackBackground(),
                                       RandomRotation(180),
                                       Flip(0.5),
+                                      Resize(512),
+                                      RandomCrop(p=0.1, scale=500),
                                       Resize(512),
                                       ToTensor()])
 val_transform = transforms.Compose([Generate(0),
