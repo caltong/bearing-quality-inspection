@@ -8,6 +8,7 @@ from torchvision.transforms.functional import crop
 from utils import add_black_background
 from PIL import Image, ImageEnhance
 import random
+from generate_new_data_v2 import generate_new_data_v2
 
 
 class Generate(object):
@@ -27,7 +28,7 @@ class Generate(object):
         # print(sample['json_path'])
         if random.random() < self.p:
             if sample['json_path'][-4:] != 'None':
-                image = generate_new_data(sample['image_path'], sample['json_path'])
+                image = generate_new_data_v2(sample['image_path'], sample['json_path'])
             else:
                 center, radius = get_radius_center(image)
                 left_up_corner = np.array(center) - radius

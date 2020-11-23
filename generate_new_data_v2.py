@@ -124,13 +124,13 @@ def background_add_target(backgroud, target):
     backgroud = cv2.cvtColor(np.asarray(backgroud), cv2.COLOR_RGB2BGR)
     target = cv2.cvtColor(np.asarray(target), cv2.COLOR_RGB2BGR)
     # 二值化
-    ret, mask = cv2.threshold(target, 120, 255, cv2.THRESH_BINARY)
+    ret, mask = cv2.threshold(target, 150, 255, cv2.THRESH_BINARY)
     # 反向
     mask_inv = cv2.bitwise_not(mask)
     # 随机角度
     random_theta = random.random() * 360
     # 随机中心距
-    random_r = random.randrange(300, 350)
+    random_r = random.randrange(300, 400)
     # padding后边长
     side = backgroud.shape[0]
     # 通过padding 移动损伤target
@@ -141,6 +141,15 @@ def background_add_target(backgroud, target):
                (int(side / 2 + random_r * math.cos(random_theta / 180 * math.pi) - mask_inv.shape[1] / 2),
                 side - mask_inv.shape[1] - int(
                     side / 2 + random_r * math.cos(random_theta / 180 * math.pi) - mask_inv.shape[1] / 2)))
+    # 出现负数的情况
+    if padding[0][0] < 0:
+        padding = ((0, side - mask_inv.shape[0]), (padding[1][0], padding[1][1]))
+    if padding[0][1] < 0:
+        padding = ((side - mask_inv.shape[0], 0), (padding[1][0], padding[1][1]))
+    if padding[1][0] < 0:
+        padding = ((padding[0][0], padding[0][1]), (0, side - mask_inv.shape[1]))
+    if padding[1][1] < 0:
+        padding = ((padding[0][0], padding[0][1]), (side - mask_inv.shape[1], 0))
     padding_3d = (padding[0], padding[1], (0, 0))
     mask_inv = np.pad(mask_inv, padding_3d, "constant")
     target = np.pad(target, padding_3d, "constant", constant_values=255)
@@ -152,7 +161,7 @@ def background_add_target(backgroud, target):
 
 
 if __name__ == '__main__':
-    image_new = generate_new_data_v2("test/07250_106.bmp", "test/12060_706.json")
+    image_new = generate_new_data_v2("test/20 (1).bmp", "test/12060_706.json")
     add_black_background(image_new).show()
     # print(get_image("01130_1.jpg"))
     # print(get_label("01130_1.json"))
