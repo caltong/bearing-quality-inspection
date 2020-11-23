@@ -5,7 +5,10 @@ import torch
 import time
 import copy
 import torchvision
+import cv2
 
+# 设置opencv 使用单线程 防止dataloader num_workers>0 发生死锁
+cv2.setNumThreads(0)
 root_dir = './'
 train_csv = './train.csv'
 val_csv = './val.csv'
@@ -28,10 +31,10 @@ val_transform = transforms.Compose([Generate(0),
                                     ToTensor()])
 
 train_dataset = GenerateDataset(csv_file='./train.csv', root_dir='./', transform=train_transform)
-train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=12)
 
 val_dataset = GenerateDataset(csv_file='./val.csv', root_dir='./', transform=val_transform)
-val_data_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
+val_data_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=True, num_workers=12)
 
 data_loaders = {'train': train_data_loader, 'val': val_data_loader}
 dataset_sizes = {'train': len(train_dataset), 'val': len(val_dataset)}

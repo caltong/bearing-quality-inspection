@@ -144,7 +144,7 @@ if __name__ == '__main__':
     #         break
     #     sample['image'].show()
     #     print(i, sample['image'], sample['label'])
-    train_data_loader = torch.utils.data.DataLoader(transforms_dataset, batch_size=16, shuffle=True)
+    train_data_loader = torch.utils.data.DataLoader(transforms_dataset, batch_size=16, shuffle=True, num_workers=12)
 
     for i in train_data_loader:
         print(i['image'].shape)
