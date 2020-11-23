@@ -6,6 +6,7 @@ from utils import get_radius_center, add_black_background
 from time import time
 import copy
 import random
+import math
 
 
 def generate_new_data(image_path, labels_path):
@@ -33,7 +34,7 @@ def generate_new_data(image_path, labels_path):
         cv2.fillPoly(mask, [labels[i]], 255)
     # inpaint
     background = cv2.inpaint(origin_crop_image, mask, 3, cv2.INPAINT_NS)
-
+    # Image.fromarray(background).show()
     # 分别调整每个损伤
     new_image = copy.deepcopy(background)
     new_image = cv2.cvtColor(new_image, cv2.COLOR_BGR2GRAY)
@@ -44,7 +45,7 @@ def generate_new_data(image_path, labels_path):
         single_mask = np.zeros(new_image.shape, np.uint8)
         single_mask = cv2.fillPoly(single_mask, [i], 1)
         single_mask = np.multiply(single_mask, origin_copy)
-
+        # Image.fromarray(single_mask).show()
         # 获取随机移动值
         xc = radius  # 中心坐标
         yc = radius  # 中心坐标
@@ -53,6 +54,8 @@ def generate_new_data(image_path, labels_path):
         k = (yc - y0) / (xc - x0)  # 移动线路 损伤与工件圆心的连线
         b = yc - k * xc
         delta_x = int((random.random() - 0.5) * 50)
+        if math.isnan(k * (x0 + delta_x) + b - y0):
+            continue
         delta_y = int(k * (x0 + delta_x) + b - y0)
         if 1:
             # 移动损伤位置

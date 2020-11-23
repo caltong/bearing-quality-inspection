@@ -135,14 +135,15 @@ if __name__ == '__main__':
                                                                        AddBlackBackground(),
                                                                        RandomRotation(180),
                                                                        Flip(0.5),
-                                                                       Resize(512)]))
-    for i in range(len(transforms_dataset)):
-        sample = transforms_dataset[i]
-        if i == 5:
-            break
-        sample['image'].show()
-        print(i, sample['image'], sample['label'])
-    # train_data_loader = torch.utils.data.DataLoader(transforms_dataset, batch_size=16, shuffle=True)
-    #
-    # for i in train_data_loader:
-    #     print(i['image'].shape)
+                                                                       Resize(512),
+                                                                       ToTensor()]))
+    # for i in range(len(transforms_dataset)):
+    #     sample = transforms_dataset[i]
+    #     if i == 5:
+    #         break
+    #     sample['image'].show()
+    #     print(i, sample['image'], sample['label'])
+    train_data_loader = torch.utils.data.DataLoader(transforms_dataset, batch_size=16, shuffle=True)
+
+    for i in train_data_loader:
+        print(i['image'].shape)

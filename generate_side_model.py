@@ -106,7 +106,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=12):
     return model
 
 
-model_ft = torchvision.models.resnet152(pretrained=True)
+model_ft = torchvision.models.resnet101(pretrained=True)
 num_ftrs = model_ft.fc.in_features
 # Here the size of each output sample is set to 2.
 # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
