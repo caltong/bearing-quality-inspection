@@ -9,6 +9,7 @@ from utils import add_black_background, add_black_center
 from PIL import Image, ImageEnhance
 import random
 from generate_new_data_v2 import generate_new_data_v2
+from tqdm import tqdm
 
 
 class Generate(object):
@@ -157,5 +158,5 @@ if __name__ == '__main__':
     #     print(i, sample['image'], sample['label'])
     train_data_loader = torch.utils.data.DataLoader(all_data, batch_size=16, shuffle=True, num_workers=12)
 
-    for i in train_data_loader:
+    for i in tqdm(train_data_loader):
         print(i['image'].shape)

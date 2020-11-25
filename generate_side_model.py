@@ -10,6 +10,7 @@ import cv2
 import random
 from torch.utils.tensorboard import SummaryWriter
 import os
+from tqdm import tqdm
 
 # 设置opencv 使用单线程 防止dataloader num_workers>0 发生死锁
 cv2.setNumThreads(0)
@@ -82,7 +83,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=12):
             running_corrects = 0
 
             # Iterate over data.
-            for sample in data_loaders[phase]:
+            for sample in tqdm(data_loaders[phase]):
                 inputs = sample['image'].to(device)
                 labels = sample['label'].to(device)
 
