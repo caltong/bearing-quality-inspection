@@ -5,7 +5,7 @@ import torch
 import numpy as np
 from utils import get_radius_center
 from torchvision.transforms.functional import crop
-from utils import add_black_background
+from utils import add_black_background, add_black_center
 from PIL import Image, ImageEnhance
 import random
 from generate_new_data_v2 import generate_new_data_v2
@@ -82,6 +82,13 @@ class AddBlackBackground(object):
         return {'image': image, 'label': label}
 
 
+class AddBlackCenter(object):
+    def __call__(self, sample):
+        image, label = sample['image'], sample['label']
+        image = add_black_center(image)
+        return {'image': image, 'label': label}
+
+
 class Resize(object):
     def __init__(self, size):
         if isinstance(size, int):
@@ -130,21 +137,25 @@ class ToTensor(object):
 
 
 if __name__ == '__main__':
-    transforms_dataset = GenerateDataset(csv_file='./train.csv', root_dir='./',
-                                         transform=transforms.Compose([Generate(1),
-                                                                       ColorJitter(0.5, 1.0, 1.0, 1.0, 1.0),
-                                                                       AddBlackBackground(),
-                                                                       RandomRotation(180),
-                                                                       Flip(0.5),
-                                                                       Resize(512),
-                                                                       ToTensor()]))
+    transform = transforms.Compose([Generate(1),
+                                    ColorJitter(0.5, 1.0, 1.0, 1.0, 1.0),
+                                    AddBlackBackground(),
+                                    AddBlackCenter(),
+                                    RandomRotation(180),
+                                    Flip(0.5),
+                                    Resize(512),
+                                    ToTensor()])
+    train_dataset = GenerateDataset(csv_file='./train.csv', root_dir='./', transform=transform)
+    val_dataset = GenerateDataset(csv_file='./val.csv', root_dir='./', transform=transform)
+    all_data = torch.utils.data.ConcatDataset([train_dataset, val_dataset])
+
     # for i in range(len(transforms_dataset)):
     #     sample = transforms_dataset[i]
     #     if i == 5:
     #         break
     #     sample['image'].show()
     #     print(i, sample['image'], sample['label'])
-    train_data_loader = torch.utils.data.DataLoader(transforms_dataset, batch_size=16, shuffle=True, num_workers=12)
+    train_data_loader = torch.utils.data.DataLoader(all_data, batch_size=16, shuffle=True, num_workers=12)
 
     for i in train_data_loader:
         print(i['image'].shape)

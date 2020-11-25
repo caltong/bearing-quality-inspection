@@ -12,6 +12,9 @@ cv2.setNumThreads(0)
 root_dir = './'
 train_csv = './train.csv'
 val_csv = './val.csv'
+SEED = 422
+torch.manual_seed(SEED)
+torch.cuda.manual_seed(SEED)
 
 epochs = 32
 batch_size = 8
@@ -31,9 +34,11 @@ val_transform = transforms.Compose([Generate(0),
                                     ToTensor()])
 
 train_dataset = GenerateDataset(csv_file='./train.csv', root_dir='./', transform=train_transform)
-train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=12)
-
 val_dataset = GenerateDataset(csv_file='./val.csv', root_dir='./', transform=val_transform)
+all_data = torch.utils.data.ConcatDataset([train_dataset, val_dataset])
+train_dataset, val_dataset = torch.utils.data.random_split(all_data, [len(all_data) - 300, 300])
+
+train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=12)
 val_data_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=True, num_workers=12)
 
 data_loaders = {'train': train_data_loader, 'val': val_data_loader}

@@ -15,6 +15,25 @@ import math
 import random
 
 
+def add_black_center(image):
+    # 添加黑色中心
+    size = image.size
+    circle = np.zeros(size, dtype='uint8')
+
+    # circle = np.stack((circle,) * 3, -1)
+    if len(np.array(image).shape) == 2:
+        img_np = cv2.cvtColor(np.array(image), cv2.COLOR_GRAY2BGR)
+    else:
+        img_np = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)  # 黑白照片其实不需要RGB2BGR
+    gray = cv2.cvtColor(img_np, cv2.COLOR_BGR2GRAY)
+    circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=30, minRadius=200, maxRadius=300)
+    cv2.circle(circle, (int(circles[0][0][0]), int(circles[0][0][1])), int(circles[0][0][2]), 255, -1)
+    img_np = cv2.bitwise_and(img_np, img_np, mask=cv2.bitwise_not(circle))
+    img = Image.fromarray(np.array(cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB)))
+
+    return img
+
+
 def add_black_background(image):
     # 添加黑色背景 适配side model
     size = image.size
