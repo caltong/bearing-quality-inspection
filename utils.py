@@ -27,7 +27,10 @@ def add_black_center(image):
         img_np = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)  # 黑白照片其实不需要RGB2BGR
     gray = cv2.cvtColor(img_np, cv2.COLOR_BGR2GRAY)
     circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=30, minRadius=200, maxRadius=300)
-    cv2.circle(circle, (int(circles[0][0][0]), int(circles[0][0][1])), int(circles[0][0][2]), 255, -1)
+    if len(circles[0]) > 0:
+        cv2.circle(circle, (int(circles[0][0][0]), int(circles[0][0][1])), int(circles[0][0][2]), 255, -1)
+    else:
+        cv2.circle(circle, (size[0] // 2, size[1] // 2), int((size[0] // 2) * 0.5), 255, -1)
     img_np = cv2.bitwise_and(img_np, img_np, mask=cv2.bitwise_not(circle))
     img = Image.fromarray(np.array(cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB)))
 
