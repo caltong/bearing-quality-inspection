@@ -27,13 +27,13 @@ random.seed(SEED)
 # tensorboard
 writer = SummaryWriter(os.path.join('logs'))
 
-epochs = 16
-batch_size = 8
+epochs = 32
+batch_size = 4
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-train_transform = transforms.Compose([Generate(0.5),
-                                      ColorJitter(0.5, 1.0, 1.0, 1.0, 1.0),
+train_transform = transforms.Compose([Generate(0.3),
+                                      ColorJitter(0.3, 0.5, 0.5, 0.5, 0.5),
                                       AddBlackBackground(),
                                       AddBlackCenter(),
                                       RandomRotation(180),
@@ -46,10 +46,16 @@ val_transform = transforms.Compose([Generate(0),
                                     Resize(512),
                                     ToTensor()])
 
-train_dataset = GenerateDataset(csv_file='./train.csv', root_dir='./', transform=train_transform)
-val_dataset = GenerateDataset(csv_file='./val.csv', root_dir='./', transform=val_transform)
-all_data = torch.utils.data.ConcatDataset([train_dataset, val_dataset])
+all_data = GenerateDataset(csv_file='./train.csv', root_dir='./')
+# val_dataset = GenerateDataset(csv_file='./val.csv', root_dir='./')
+# all_data = torch.utils.data.ConcatDataset([train_dataset, val_dataset])
 train_dataset, val_dataset = torch.utils.data.random_split(all_data, [len(all_data) - 1000, 1000])
+
+train_dataset.dataset = copy.copy(all_data)
+val_dataset.dataset = copy.copy(all_data)
+
+val_dataset.dataset.transform = val_transform
+train_dataset.dataset.transform = train_transform
 
 train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=12)
 val_data_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=True, num_workers=12)
@@ -137,7 +143,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=12):
     return model
 
 
-model_ft = torchvision.models.resnet101(pretrained=True)
+model_ft = torchvision.models.resnext101_32x8d(pretrained=True)
 num_ftrs = model_ft.fc.in_features
 # Here the size of each output sample is set to 2.
 # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
@@ -154,7 +160,7 @@ criterion = torch.nn.CrossEntropyLoss()
 optimizer_ft = torch.optim.SGD(model_ft.parameters(), lr=lr, momentum=0.9)
 
 # Decay LR by a factor of 0.1 every 7 epochs
-exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
+exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=12, gamma=0.1)
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
                        num_epochs=epochs)
