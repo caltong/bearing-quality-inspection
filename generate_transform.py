@@ -10,6 +10,7 @@ from PIL import Image, ImageEnhance
 import random
 from generate_new_data_v2 import generate_new_data_v2
 from tqdm import tqdm
+from torchvision.transforms import ColorJitter as PytorchColorJitter
 
 
 class Generate(object):
@@ -59,6 +60,63 @@ class ColorJitter(object):
         image = ImageEnhance.Contrast(image).enhance((random.random() + 0.5) * self.contrast)
         image = ImageEnhance.Brightness(image).enhance((random.random() + 0.5) * self.brightness)
         image = ImageEnhance.Sharpness(image).enhance((random.random() + 0.5) * self.sharpness)
+        # image = np.array(image)
+        return {'image': image, 'label': label}
+
+
+class ColorJitterV2(object):
+    # ColorJitterV2+Sharpness组合在一起改进了原版ColorJitter
+    def __init__(self, brightness=(0, 0), contrast=(0, 0), saturation=(0, 0), hue=(0, 0)):
+        # 0为概率p 1为系数
+        self.brightness = brightness
+        self.contrast = contrast
+        self.saturation = saturation
+        self.hue = hue
+
+    def __call__(self, sample):
+        image, label = sample['image'], sample['label']
+        if random.random() < self.brightness[0]:
+            pytorch_color_jitter = PytorchColorJitter(brightness=self.brightness[1],
+                                                      contrast=0,
+                                                      saturation=0,
+                                                      hue=0)
+            image = pytorch_color_jitter.forward(image)
+
+        if random.random() < self.contrast[0]:
+            pytorch_color_jitter = PytorchColorJitter(brightness=0,
+                                                      contrast=self.contrast[1],
+                                                      saturation=0,
+                                                      hue=0)
+            image = pytorch_color_jitter.forward(image)
+
+        if random.random() < self.saturation[0]:
+            pytorch_color_jitter = PytorchColorJitter(brightness=0,
+                                                      contrast=0,
+                                                      saturation=self.saturation[1],
+                                                      hue=0)
+            image = pytorch_color_jitter.forward(image)
+
+        if random.random() < self.hue[0]:
+            pytorch_color_jitter = PytorchColorJitter(brightness=0,
+                                                      contrast=0,
+                                                      saturation=0,
+                                                      hue=self.hue[1])
+            image = pytorch_color_jitter.forward(image)
+
+        return {'image': image, 'label': label}
+
+
+class Sharpness(object):
+    def __init__(self, p, value):
+        self.p = p
+        self.value = value
+
+    def __call__(self, sample):
+        image, label = sample['image'], sample['label']
+        if random.random() > self.p:
+            return {'image': image, 'label': label}
+        # image = Image.fromarray(image, mode='RGB')
+        image = ImageEnhance.Sharpness(image).enhance(random.uniform(max(0, 1 - self.value), 1 + self.value))
         # image = np.array(image)
         return {'image': image, 'label': label}
 
@@ -140,6 +198,8 @@ class ToTensor(object):
 if __name__ == '__main__':
     transform = transforms.Compose([Generate(1),
                                     ColorJitter(0.5, 1.0, 1.0, 1.0, 1.0),
+                                    ColorJitterV2(brightness=(1, 1), contrast=(1, 1), saturation=(1, 1), hue=(1, 0.5)),
+                                    Sharpness(p=1, value=1),
                                     AddBlackBackground(),
                                     AddBlackCenter(),
                                     RandomRotation(180),
