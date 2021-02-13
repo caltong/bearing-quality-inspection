@@ -5,9 +5,12 @@ import torch
 import numpy as np
 from utils import get_radius_center
 from torchvision.transforms.functional import crop
-from utils import add_black_background
+from utils import add_black_background, add_black_center
 from PIL import Image, ImageEnhance
 import random
+from generate_new_data_v2 import generate_new_data_v2
+from tqdm import tqdm
+from torchvision.transforms import ColorJitter as PytorchColorJitter
 
 
 class Generate(object):
@@ -27,7 +30,7 @@ class Generate(object):
         # print(sample['json_path'])
         if random.random() < self.p:
             if sample['json_path'][-4:] != 'None':
-                image = generate_new_data(sample['image_path'], sample['json_path'])
+                image = generate_new_data_v2(sample['image_path'], sample['json_path'])
             else:
                 center, radius = get_radius_center(image)
                 left_up_corner = np.array(center) - radius
@@ -61,6 +64,63 @@ class ColorJitter(object):
         return {'image': image, 'label': label}
 
 
+class ColorJitterV2(object):
+    # ColorJitterV2+Sharpness组合在一起改进了原版ColorJitter
+    def __init__(self, brightness=(0, 0), contrast=(0, 0), saturation=(0, 0), hue=(0, 0)):
+        # 0为概率p 1为系数
+        self.brightness = brightness
+        self.contrast = contrast
+        self.saturation = saturation
+        self.hue = hue
+
+    def __call__(self, sample):
+        image, label = sample['image'], sample['label']
+        if random.random() < self.brightness[0]:
+            pytorch_color_jitter = PytorchColorJitter(brightness=self.brightness[1],
+                                                      contrast=0,
+                                                      saturation=0,
+                                                      hue=0)
+            image = pytorch_color_jitter.forward(image)
+
+        if random.random() < self.contrast[0]:
+            pytorch_color_jitter = PytorchColorJitter(brightness=0,
+                                                      contrast=self.contrast[1],
+                                                      saturation=0,
+                                                      hue=0)
+            image = pytorch_color_jitter.forward(image)
+
+        if random.random() < self.saturation[0]:
+            pytorch_color_jitter = PytorchColorJitter(brightness=0,
+                                                      contrast=0,
+                                                      saturation=self.saturation[1],
+                                                      hue=0)
+            image = pytorch_color_jitter.forward(image)
+
+        if random.random() < self.hue[0]:
+            pytorch_color_jitter = PytorchColorJitter(brightness=0,
+                                                      contrast=0,
+                                                      saturation=0,
+                                                      hue=self.hue[1])
+            image = pytorch_color_jitter.forward(image)
+
+        return {'image': image, 'label': label}
+
+
+class Sharpness(object):
+    def __init__(self, p, value):
+        self.p = p
+        self.value = value
+
+    def __call__(self, sample):
+        image, label = sample['image'], sample['label']
+        if random.random() > self.p:
+            return {'image': image, 'label': label}
+        # image = Image.fromarray(image, mode='RGB')
+        image = ImageEnhance.Sharpness(image).enhance(random.uniform(max(0, 1 - self.value), 1 + self.value))
+        # image = np.array(image)
+        return {'image': image, 'label': label}
+
+
 class RandomRotation(object):
     def __init__(self, degrees):
         if degrees < 0 or degrees > 180:
@@ -78,6 +138,13 @@ class AddBlackBackground(object):
     def __call__(self, sample):
         image, label = sample['image'], sample['label']
         image = add_black_background(image)
+        return {'image': image, 'label': label}
+
+
+class AddBlackCenter(object):
+    def __call__(self, sample):
+        image, label = sample['image'], sample['label']
+        image = add_black_center(image)
         return {'image': image, 'label': label}
 
 
@@ -110,30 +177,6 @@ class Flip(object):
         return {'image': image, 'label': label}
 
 
-class RandomCrop(object):
-    def __init__(self, p=0.5, scale=224):
-        self.p = p
-        self.scale = scale
-
-    def __call__(self, sample):
-        image, label = sample['image'], sample['label']
-        if random.random() < self.p:
-            image = np.array(image)
-            origin_width = image.shape[0]
-            if origin_width < self.scale:
-                raise TypeError('scale should be smaller than origin width')
-
-            random_scale = random.randint(self.scale, origin_width)
-            random_start_left = random.randint(0, origin_width - random_scale)
-            random_start_right = random.randint(0, origin_width - random_scale)
-            new_image = image[random_start_left:random_start_left + random_scale,
-                        random_start_right:random_start_right + random_scale,
-                        :]
-            new_image = Image.fromarray(new_image, mode='RGB')
-            return {'image': new_image, 'label': label}
-        return {'image': image, 'label': label}
-
-
 class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
 
@@ -153,22 +196,27 @@ class ToTensor(object):
 
 
 if __name__ == '__main__':
-    transforms_dataset = GenerateDataset(csv_file='./train.csv', root_dir='./',
-                                         transform=transforms.Compose([Generate(1),
-                                                                       ColorJitter(0.5, 1.0, 1.0, 1.0, 1.0),
-                                                                       AddBlackBackground(),
-                                                                       RandomRotation(180),
-                                                                       Flip(0.5),
-                                                                       Resize(512),
-                                                                       # RandomCrop(p=1, scale=450)
-                                                                       ]))
-    for i in range(len(transforms_dataset)):
-        sample = transforms_dataset[i]
-        if i == 5:
-            break
-        sample['image'].show()
-        print(i, sample['image'], sample['label'])
-    # train_data_loader = torch.utils.data.DataLoader(transforms_dataset, batch_size=16, shuffle=True)
-    #
-    # for i in train_data_loader:
-    #     print(i['image'].shape)
+    transform = transforms.Compose([Generate(1),
+                                    ColorJitter(0.5, 1.0, 1.0, 1.0, 1.0),
+                                    ColorJitterV2(brightness=(1, 1), contrast=(1, 1), saturation=(1, 1), hue=(1, 0.5)),
+                                    Sharpness(p=1, value=1),
+                                    AddBlackBackground(),
+                                    AddBlackCenter(),
+                                    RandomRotation(180),
+                                    Flip(0.5),
+                                    Resize(512),
+                                    ToTensor()])
+    train_dataset = GenerateDataset(csv_file='./train.csv', root_dir='./', transform=transform)
+    val_dataset = GenerateDataset(csv_file='./val.csv', root_dir='./', transform=transform)
+    all_data = torch.utils.data.ConcatDataset([train_dataset, val_dataset])
+
+    # for i in range(len(transforms_dataset)):
+    #     sample = transforms_dataset[i]
+    #     if i == 5:
+    #         break
+    #     sample['image'].show()
+    #     print(i, sample['image'], sample['label'])
+    train_data_loader = torch.utils.data.DataLoader(all_data, batch_size=16, shuffle=True, num_workers=12)
+
+    for i in tqdm(train_data_loader):
+        print(i['image'].shape)
