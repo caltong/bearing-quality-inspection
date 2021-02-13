@@ -11,12 +11,12 @@ root_dir = './'
 train_csv = './train.csv'
 val_csv = './val.csv'
 
-epochs = 16
+epochs = 64
 batch_size = 8
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-train_transform = transforms.Compose([Generate(0),
+train_transform = transforms.Compose([Generate(0.2),
                                       ColorJitter(0.1, 0.1, 0.1, 0.1, 0.1),
                                       AddBlackBackground(),
                                       RandomRotation(180),
