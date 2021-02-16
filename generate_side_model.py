@@ -1,7 +1,7 @@
 from torchvision import transforms
 from generate_dataset import GenerateDataset
 from generate_transform import Generate, ToTensor, ColorJitter, AddBlackBackground, RandomRotation, Flip, Resize, \
-    AddBlackCenter
+    AddBlackCenter, ColorJitterV2, Sharpness
 import torch
 import time
 import copy
@@ -32,8 +32,13 @@ batch_size = 4
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-train_transform = transforms.Compose([Generate(0.3),
-                                      ColorJitter(0.3, 0.5, 0.5, 0.5, 0.5),
+train_transform = transforms.Compose([Generate(0.5),
+                                      # ColorJitter(0.3, 0.5, 0.5, 0.5, 0.5),
+                                      ColorJitterV2(brightness=(0.5, 1),
+                                                    contrast=(0.5, 1),
+                                                    saturation=(0, 0),
+                                                    hue=(0, 0)),
+                                      Sharpness(p=0.5, value=1),
                                       AddBlackBackground(),
                                       AddBlackCenter(),
                                       RandomRotation(180),
