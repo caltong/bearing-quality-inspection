@@ -197,7 +197,7 @@ class ToTensor(object):
 
 if __name__ == '__main__':
     transform = transforms.Compose([Generate(1),
-                                    ColorJitter(0.5, 1.0, 1.0, 1.0, 1.0),
+                                    # ColorJitter(0.5, 1.0, 1.0, 1.0, 1.0),
                                     ColorJitterV2(brightness=(1, 1), contrast=(1, 1), saturation=(1, 1), hue=(1, 0.5)),
                                     Sharpness(p=1, value=1),
                                     AddBlackBackground(),
