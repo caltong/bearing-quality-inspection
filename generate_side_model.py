@@ -32,17 +32,17 @@ batch_size = 4
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-train_transform = transforms.Compose([Generate(0.5),
+train_transform = transforms.Compose([Generate(0),
                                       # ColorJitter(0.3, 0.5, 0.5, 0.5, 0.5),
-                                      ColorJitterV2(brightness=(0.5, 1),
-                                                    contrast=(0.5, 1),
+                                      ColorJitterV2(brightness=(0, 1),
+                                                    contrast=(0, 1),
                                                     saturation=(0, 0),
                                                     hue=(0, 0)),
-                                      Sharpness(p=0.5, value=1),
+                                      Sharpness(p=0, value=1),
                                       AddBlackBackground(),
                                       AddBlackCenter(),
-                                      RandomRotation(180),
-                                      Flip(0.5),
+                                      # RandomRotation(180),
+                                      # Flip(0.5),
                                       Resize(512),
                                       ToTensor()])
 val_transform = transforms.Compose([Generate(0),
