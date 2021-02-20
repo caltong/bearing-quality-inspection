@@ -161,7 +161,7 @@ def background_add_target(backgroud, target):
 
 
 if __name__ == '__main__':
-    image_new = generate_new_data_v2("test/01130_124.jpg", "test/01130_1.json")
+    image_new = generate_new_data_v2("test/01130_12.jpg", "test/01130_1.json")
     image_new.show()
     # add_black_background(image_new).show()
     # print(get_image("01130_1.jpg"))
