@@ -32,15 +32,16 @@ batch_size = 4
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-train_transform = transforms.Compose([Generate(0.5),
-                                      ColorJitter(0.5, 0.3, 0.3, 0.3, 0.3),
-                                      # ColorJitterV2(brightness=(0.5, 0.3),
-                                      #               contrast=(0.5, 0.3),
-                                      #               saturation=(0, 0),
-                                      #               hue=(0, 0)),
-                                      # Sharpness(p=0, value=0.9),
+train_transform = transforms.Compose([
+                                      Generate(0.3),
+                                      # ColorJitter(0.5, 0.3, 0.3, 0.3, 0.3),
+                                      ColorJitterV2(brightness=(0.3, 0.3),
+                                                    contrast=(0.3, 0.3),
+                                                    saturation=(0, 0),
+                                                    hue=(0, 0)),
+                                      Sharpness(p=0.3, value=0.3),
                                       AddBlackBackground(),
-                                      AddBlackCenter(),
+                                      # AddBlackCenter(),
                                       RandomRotation(180),
                                       Flip(0.5),
                                       Resize(512),
@@ -54,7 +55,7 @@ val_transform = transforms.Compose([Generate(0),
 all_data = GenerateDataset(csv_file='./train.csv', root_dir='./')
 # val_dataset = GenerateDataset(csv_file='./val.csv', root_dir='./')
 # all_data = torch.utils.data.ConcatDataset([train_dataset, val_dataset])
-train_dataset, val_dataset = torch.utils.data.random_split(all_data, [len(all_data) - 1000, 1000])
+train_dataset, val_dataset = torch.utils.data.random_split(all_data, [len(all_data) - 500, 500])
 
 train_dataset.dataset = copy.copy(all_data)
 val_dataset.dataset = copy.copy(all_data)
@@ -165,10 +166,10 @@ criterion = torch.nn.CrossEntropyLoss()
 optimizer_ft = torch.optim.SGD(model_ft.parameters(), lr=lr, momentum=0.9)
 
 # Decay LR by a factor of 0.1 every 7 epochs
-exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=12, gamma=0.1)
+exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.3)
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
                        num_epochs=epochs)
 
 # torch.save(model_ft.state_dict(), 'side_model_use_restnet50_crop_and_crop.pth')
-torch.save(model_ft, 'side_model_use_resnet50_and_crop.pth')
+torch.save(model_ft, 'side_model.pth')

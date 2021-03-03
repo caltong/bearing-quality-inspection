@@ -196,14 +196,15 @@ class ToTensor(object):
 
 
 if __name__ == '__main__':
-    transform = transforms.Compose([Generate(1),
+    transform = transforms.Compose([
+        # Generate(1),
                                     # ColorJitter(0.5, 1.0, 1.0, 1.0, 1.0),
-                                    ColorJitterV2(brightness=(1, 1), contrast=(1, 1), saturation=(1, 1), hue=(1, 0.5)),
-                                    Sharpness(p=1, value=1),
-                                    AddBlackBackground(),
-                                    AddBlackCenter(),
-                                    RandomRotation(180),
-                                    Flip(0.5),
+                                    # ColorJitterV2(brightness=(1, 1), contrast=(1, 1), saturation=(1, 1), hue=(1, 0.5)),
+                                    # Sharpness(p=1, value=1),
+                                    # AddBlackBackground(),
+                                    # AddBlackCenter(),
+                                    # RandomRotation(180),
+                                    # Flip(0.5),
                                     Resize(512),
                                     ToTensor()])
     train_dataset = GenerateDataset(csv_file='./train.csv', root_dir='./', transform=transform)
