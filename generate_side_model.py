@@ -40,7 +40,7 @@ if not os.path.exists(bash_dir):
     os.makedirs(bash_dir)
 writer = SummaryWriter(bash_dir)
 
-epochs = 1
+epochs = 32
 batch_size = 4
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -161,7 +161,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=12):
     return model
 
 
-model_ft = torchvision.models.resnet18(pretrained=True)
+model_ft = torchvision.models.resnext101_32x8d(pretrained=True)
 num_ftrs = model_ft.fc.in_features
 # Here the size of each output sample is set to 2.
 # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
