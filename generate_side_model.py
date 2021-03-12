@@ -11,6 +11,15 @@ import random
 from torch.utils.tensorboard import SummaryWriter
 import os
 from tqdm import tqdm
+import sys
+
+# 简单读取输入参数 以便使用bash
+# sys.argv[0] 为py文件名
+print(sys.argv)
+p = float(sys.argv[1])
+v = float(sys.argv[2])
+print(p)
+print(v)
 
 # 设置opencv 使用单线程 防止dataloader num_workers>0 发生死锁
 cv2.setNumThreads(0)
@@ -25,21 +34,24 @@ torch.cuda.manual_seed(SEED)
 random.seed(SEED)
 
 # tensorboard
-writer = SummaryWriter(os.path.join('logs'))
+# 根据输入参数查看是否存在目录 不存在则创建
+bash_dir = os.path.join('logs', 'bashp' + str(p) + 'v' + str(v))
+if not os.path.exists(bash_dir):
+    os.makedirs(bash_dir)
+writer = SummaryWriter(bash_dir)
 
-epochs = 32
+epochs = 1
 batch_size = 4
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-train_transform = transforms.Compose([
-                                      Generate(0.3),
+train_transform = transforms.Compose([Generate(0),
                                       # ColorJitter(0.5, 0.3, 0.3, 0.3, 0.3),
-                                      ColorJitterV2(brightness=(0.3, 0.3),
-                                                    contrast=(0.3, 0.3),
-                                                    saturation=(0, 0),
-                                                    hue=(0, 0)),
-                                      Sharpness(p=0.3, value=0.3),
+                                      # ColorJitterV2(brightness=(0.5, 0.3),
+                                      #               contrast=(0.5, 0.3),
+                                      #               saturation=(0, 0),
+                                      #               hue=(0, 0)),
+                                      Sharpness(p=p, value=v),
                                       AddBlackBackground(),
                                       # AddBlackCenter(),
                                       RandomRotation(180),
@@ -48,7 +60,7 @@ train_transform = transforms.Compose([
                                       ToTensor()])
 val_transform = transforms.Compose([Generate(0),
                                     AddBlackBackground(),
-                                    AddBlackCenter(),
+                                    # AddBlackCenter(),
                                     Resize(512),
                                     ToTensor()])
 
@@ -149,7 +161,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=12):
     return model
 
 
-model_ft = torchvision.models.resnext101_32x8d(pretrained=True)
+model_ft = torchvision.models.resnet18(pretrained=True)
 num_ftrs = model_ft.fc.in_features
 # Here the size of each output sample is set to 2.
 # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
