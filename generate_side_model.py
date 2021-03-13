@@ -16,10 +16,12 @@ import sys
 # 简单读取输入参数 以便使用bash
 # sys.argv[0] 为py文件名
 print(sys.argv)
-p = float(sys.argv[1])
-v = float(sys.argv[2])
-print(p)
-print(v)
+cp = float(sys.argv[1])
+cv = float(sys.argv[2])
+sp = float(sys.argv[3])
+sv = float(sys.argv[4])
+gp = float(sys.argv[5])
+print(cp, cv, sp, sv, gp)
 
 # 设置opencv 使用单线程 防止dataloader num_workers>0 发生死锁
 cv2.setNumThreads(0)
@@ -35,23 +37,24 @@ random.seed(SEED)
 
 # tensorboard
 # 根据输入参数查看是否存在目录 不存在则创建
-bash_dir = os.path.join('logs', 'bashp' + str(p) + 'v' + str(v))
+dir_name = 'cp' + str(cp) + 'cv' + str(cv) + 'sp' + str(sp) + 'sv' + str(sv) + 'gp' + str(gp)
+bash_dir = os.path.join('logs', dir_name)
 if not os.path.exists(bash_dir):
     os.makedirs(bash_dir)
 writer = SummaryWriter(bash_dir)
 
 epochs = 32
-batch_size = 4
+batch_size = 24
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-train_transform = transforms.Compose([Generate(0),
+train_transform = transforms.Compose([Generate(gp),
                                       # ColorJitter(0.5, 0.3, 0.3, 0.3, 0.3),
-                                      # ColorJitterV2(brightness=(0.5, 0.3),
-                                      #               contrast=(0.5, 0.3),
-                                      #               saturation=(0, 0),
-                                      #               hue=(0, 0)),
-                                      Sharpness(p=p, value=v),
+                                      ColorJitterV2(brightness=(cp, cv),
+                                                    contrast=(cp, cv),
+                                                    saturation=(0, 0),
+                                                    hue=(0, 0)),
+                                      Sharpness(p=sp, value=sv),
                                       AddBlackBackground(),
                                       # AddBlackCenter(),
                                       RandomRotation(180),
@@ -67,7 +70,7 @@ val_transform = transforms.Compose([Generate(0),
 all_data = GenerateDataset(csv_file='./train.csv', root_dir='./')
 # val_dataset = GenerateDataset(csv_file='./val.csv', root_dir='./')
 # all_data = torch.utils.data.ConcatDataset([train_dataset, val_dataset])
-train_dataset, val_dataset = torch.utils.data.random_split(all_data, [len(all_data) - 500, 500])
+train_dataset, val_dataset = torch.utils.data.random_split(all_data, [len(all_data) - 1000, 1000])
 
 train_dataset.dataset = copy.copy(all_data)
 val_dataset.dataset = copy.copy(all_data)
@@ -184,4 +187,4 @@ model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
                        num_epochs=epochs)
 
 # torch.save(model_ft.state_dict(), 'side_model_use_restnet50_crop_and_crop.pth')
-torch.save(model_ft, 'side_model.pth')
+torch.save(model_ft, 'side_model' + dir_name + '.pth')
