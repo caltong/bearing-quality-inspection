@@ -12,6 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 import os
 from tqdm import tqdm
 import sys
+from utils import FocalLoss
 
 # 简单读取输入参数 以便使用bash
 # sys.argv[0] 为py文件名
@@ -21,7 +22,9 @@ cv = float(sys.argv[2])
 sp = float(sys.argv[3])
 sv = float(sys.argv[4])
 gp = float(sys.argv[5])
-print(cp, cv, sp, sv, gp)
+alpha = float(sys.argv[6])
+gamma = float(sys.argv[7])
+print(cp, cv, sp, sv, gp, alpha, gamma)
 
 # 设置opencv 使用单线程 防止dataloader num_workers>0 发生死锁
 cv2.setNumThreads(0)
@@ -37,14 +40,16 @@ random.seed(SEED)
 
 # tensorboard
 # 根据输入参数查看是否存在目录 不存在则创建
-dir_name = 'cp' + str(cp) + 'cv' + str(cv) + 'sp' + str(sp) + 'sv' + str(sv) + 'gp' + str(gp)
+dir_name = 'cp' + str(cp) + 'cv' + str(cv) + 'sp' + str(sp) + 'sv' + str(sv) + 'gp' + str(gp) + 'alpha' + \
+           str(alpha) + 'gamma' + str(gamma)
+print(dir_name)
 bash_dir = os.path.join('logs', dir_name)
 if not os.path.exists(bash_dir):
     os.makedirs(bash_dir)
 writer = SummaryWriter(bash_dir)
 
 epochs = 32
-batch_size = 24
+batch_size = 4
 lr = 0.001
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -175,7 +180,8 @@ model_ft.fc = torch.nn.Linear(num_ftrs, 2)
 model_ft = torch.nn.DataParallel(model_ft)
 model_ft.cuda()
 
-criterion = torch.nn.CrossEntropyLoss()
+# criterion = torch.nn.CrossEntropyLoss()
+criterion = FocalLoss(class_num=2, gamma=gamma)
 
 # Observe that all parameters are being optimized
 optimizer_ft = torch.optim.SGD(model_ft.parameters(), lr=lr, momentum=0.9)
