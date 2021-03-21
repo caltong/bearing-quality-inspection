@@ -61,7 +61,7 @@ def get_radius_center(image):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     else:
         gray = img  # 已经是灰度图
-    blurred = cv2.GaussianBlur(gray, (9, 9), 0)
+    # blurred = cv2.GaussianBlur(gray, (9, 9), 0)
     # 提取梯度
     gradX = cv2.Sobel(gray, ddepth=cv2.CV_32F, dx=1, dy=0)
     gradY = cv2.Sobel(gray, ddepth=cv2.CV_32F, dx=0, dy=1)
