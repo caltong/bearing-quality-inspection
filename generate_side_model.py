@@ -181,8 +181,8 @@ model_ft.fc = torch.nn.Linear(num_ftrs, 2)
 model_ft = torch.nn.DataParallel(model_ft)
 model_ft.cuda()
 
-criterion = torch.nn.CrossEntropyLoss()
-# criterion = FocalLoss(class_num=2, alpha=torch.tensor([[alpha], [2 - alpha]]), gamma=gamma)
+# criterion = torch.nn.CrossEntropyLoss()
+criterion = FocalLoss(class_num=2, alpha=torch.tensor([[alpha], [2 - alpha]]), gamma=gamma)
 
 # Observe that all parameters are being optimized
 optimizer_ft = torch.optim.SGD(model_ft.parameters(), lr=lr, momentum=0.9)
