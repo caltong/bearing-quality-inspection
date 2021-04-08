@@ -14,7 +14,7 @@ from torch.autograd import Variable
 import math
 import random
 
-# note
+# note test
 def add_black_center(image):
     # 添加黑色中心
     size = image.size
