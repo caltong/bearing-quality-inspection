@@ -14,6 +14,15 @@ from PIL import Image
 import os
 
 def get_c_r_naive_duan(image):
+    '''
+    object crop for duan
+    Args:
+        image: pil format
+
+    Returns:
+        center coordinates corresponding to original image
+        radius of selected circle
+    '''
     img = np.asarray(image)
     img_shape = img.shape
 
